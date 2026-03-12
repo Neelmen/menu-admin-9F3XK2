@@ -1,188 +1,199 @@
-/* ===============================
-   Styles généraux
-================================= */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: #f0f0f5; /* fond doux pour admin */
-    text-align: center;
-    color: #333;
+font-family: Arial, sans-serif;
+margin: 0;
+padding: 20px;
+background: #f0f0f5;
+text-align: center;
+color: #333;
 }
 
-h1 {
-    margin-bottom: 20px;
-    color: #2b2b2b;
+h1{
+margin-bottom:20px;
 }
 
-/* ===============================
-   Login admin
-================================= */
-#login-section {
-    background: white;
-    display: inline-block;
-    padding: 30px 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+/* LOGIN */
+
+#login-section{
+background:white;
+display:inline-block;
+padding:30px 40px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-#login-section input {
-    display: block;
-    width: 250px;
-    padding: 12px;
-    margin: 10px auto;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
+#login-section input{
+display:block;
+width:250px;
+padding:12px;
+margin:10px auto;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
-#login-section button {
-    background: #2b2b2b;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+#login-section button{
+background:#2b2b2b;
+color:white;
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
 }
 
-#login-section button:hover {
-    background: #e63946;
+#login-section button:hover{
+background:#e63946;
 }
 
-/* ===============================
-   Admin panel
-================================= */
-#admin-panel {
-    max-width: 900px;
-    margin: auto;
+/* ADMIN PANEL */
+
+#admin-panel{
+max-width:900px;
+margin:auto;
 }
 
-/* Déconnexion */
-#admin-panel > button {
-    background: #e63946;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+#admin-panel > button{
+background:#e63946;
+color:white;
+border:none;
+padding:12px 25px;
+border-radius:25px;
+cursor:pointer;
+margin-bottom:20px;
 }
 
-#admin-panel > button:hover {
-    background: #b91c2e;
-}
+/* FORM */
 
-/* ===============================
-   Formulaire ajout plat
-================================= */
-#dish-form {
-    background: white;
-    padding: 25px 30px;
-    border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    text-align: left;
+#dish-form{
+background:white;
+padding:25px;
+border-radius:15px;
+margin-bottom:30px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+text-align:left;
 }
 
 #dish-form input,
 #dish-form select,
-#dish-form textarea {
-    width: calc(100% - 20px);
-    margin: 8px 0;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    display: block;
+#dish-form textarea{
+width:calc(100% - 20px);
+margin:8px 0;
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
 }
 
-#dish-form button {
-    background: #2b2b2b;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 15px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 15px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+#dish-form button{
+background:#2b2b2b;
+color:white;
+border:none;
+padding:12px 25px;
+border-radius:15px;
+cursor:pointer;
+margin-top:15px;
 }
 
-#dish-form button:hover {
-    background: #e63946;
+/* LISTE PLATS */
+
+#dish-list{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:20px;
 }
 
-/* ===============================
-   Aperçu image
-================================= */
-#image-preview img {
-    max-width: 200px;
-    margin-top: 10px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+/* CARD */
+
+.dish-card{
+background:white;
+border-radius:15px;
+width:250px;
+overflow:hidden;
+box-shadow:0 10px 25px rgba(0,0,0,0.15);
 }
 
-/* ===============================
-   Liste des plats (cartes)
-================================= */
-#dish-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
+/* IMAGE */
+
+.dish-image{
+position:relative;
 }
 
-#dish-list > div {
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    width: 250px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    text-align: left;
-    transition: transform 0.2s;
+.dish-image img{
+width:100%;
+height:150px;
+object-fit:cover;
 }
 
-#dish-list > div:hover {
-    transform: translateY(-5px);
+/* OVERLAY ACTIONS */
+
+.dish-actions{
+
+position:absolute;
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+gap:10px;
+
+background:rgba(0,0,0,0.6);
+
+opacity:0;
+transition:opacity 0.3s;
+
 }
 
-#dish-list img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 10px;
+/* hover desktop */
+
+.dish-image:hover .dish-actions{
+opacity:1;
 }
 
-#dish-list button {
-    background: #2b2b2b;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 8px;
+/* boutons */
+
+.dish-actions button{
+
+background:white;
+color:#333;
+
+border:none;
+padding:8px 14px;
+
+border-radius:8px;
+
+cursor:pointer;
+
+font-size:14px;
 }
 
-#dish-list button:hover {
-    background: #e63946;
+/* supprimer */
+
+.dish-actions button:last-child{
+background:#e63946;
+color:white;
 }
 
-/* ===============================
-   Responsive
-================================= */
-@media (max-width: 600px) {
-    #dish-list {
-        flex-direction: column;
-        align-items: center;
-    }
+.dish-actions button:hover{
+transform:scale(1.05);
+}
 
-    #dish-form input,
-    #dish-form select,
-    #dish-form textarea {
-        width: 95%;
-    }
+/* info plat */
+
+.dish-info{
+padding:10px;
+text-align:left;
+}
+
+/* responsive */
+
+@media(max-width:600px){
+
+#dish-list{
+flex-direction:column;
+align-items:center;
+}
+
 }
