@@ -24,11 +24,11 @@
 
 <h2>Connexion Admin</h2>
 
-<input type="email" id="admin-email" placeholder="Email">
+<input type="email" id="admin-email" placeholder="Email" required>
 
-<input type="password" id="admin-password" placeholder="Mot de passe">
+<input type="password" id="admin-password" placeholder="Mot de passe" required>
 
-<button onclick="loginAdmin()">Se connecter</button>
+<button type="button" onclick="loginAdmin()">Se connecter</button>
 
 <p id="login-message"></p>
 
@@ -39,7 +39,7 @@
 
 <div id="admin-panel" style="display:none;">
 
-<button onclick="logoutAdmin()">Se déconnecter</button>
+<button type="button" onclick="logoutAdmin()">Se déconnecter</button>
 
 <h2>Ajouter un plat</h2>
 
@@ -81,9 +81,13 @@ Disponible
 
 </div>
 
+
 <script src="app.js"></script>
 
+
 <script>
+
+document.addEventListener("DOMContentLoaded", () => {
 
 const imageInput = document.getElementById("image_url");
 const preview = document.getElementById("image-preview");
@@ -101,6 +105,8 @@ preview.innerHTML = `<img src="${url}" style="max-width:200px">`;
 preview.innerHTML = "";
 
 }
+
+});
 
 });
 
