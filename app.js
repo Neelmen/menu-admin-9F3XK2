@@ -4,6 +4,18 @@ const SUPABASE_KEY = "TA_CLE_PUBLISHABLE";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
+// INITIALISATION AU CHARGEMENT DE LA PAGE
+
+document.addEventListener("DOMContentLoaded", () => {
+
+document.getElementById("admin-panel").style.display = "none";
+document.getElementById("login-section").style.display = "block";
+
+checkSession();
+
+});
+
+
 
 // LOGIN ADMIN
 
@@ -63,8 +75,6 @@ loadDishes();
 }
 
 }
-
-checkSession();
 
 
 
