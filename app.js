@@ -4,7 +4,7 @@ const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// INITIALISATION AU CHARGEMENT DE LA PAGE
+// INITIALISATION AU CHARGEMENT
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -14,7 +14,6 @@ document.getElementById("login-section").style.display = "block";
 checkSession();
 
 });
-
 
 
 // LOGIN ADMIN
@@ -46,7 +45,6 @@ loadDishes();
 }
 
 
-
 // LOGOUT
 
 async function logoutAdmin(){
@@ -56,7 +54,6 @@ await client.auth.signOut();
 location.reload();
 
 }
-
 
 
 // VERIFICATION SESSION
@@ -77,7 +74,6 @@ loadDishes();
 }
 
 
-
 // CHARGER LES PLATS
 
 async function loadDishes(){
@@ -95,30 +91,46 @@ return;
 }
 
 const container = document.getElementById("dish-list");
-
 container.innerHTML = "";
 
 data.forEach(dish => {
 
 const div = document.createElement("div");
-
-div.style.border = "1px solid #ccc";
-div.style.padding = "10px";
-div.style.marginBottom = "10px";
+div.className = "dish-card";
 
 div.innerHTML = `
 
-<b>${dish.name}</b> - ${dish.category} - ${dish.price}€
+<div class="dish-image">
+
+${dish.image_url ? `<img src="${dish.image_url}">` : ""}
+
+<div class="dish-actions">
 
 <button onclick="toggleDish('${dish.id}', ${dish.available})">
 ${dish.available ? "Désactiver" : "Activer"}
 </button>
 
-${dish.image_url ? `<br><img src="${dish.image_url}" style="max-width:150px">` : ""}
+<button onclick="editDish('${dish.id}')">
+Modifier
+</button>
+
+<button onclick="deleteDish('${dish.id}')">
+Supprimer
+</button>
+
+</div>
+
+</div>
+
+<div class="dish-info">
+
+<b>${dish.name}</b><br>
+${dish.category} - ${dish.price}€<br>
 
 <p>${dish.description || ""}</p>
-
 <p><i>${dish.ingredients || ""}</i></p>
+
+</div>
 
 `;
 
@@ -127,7 +139,6 @@ container.appendChild(div);
 });
 
 }
-
 
 
 // ACTIVER / DESACTIVER
@@ -143,6 +154,60 @@ loadDishes();
 
 }
 
+
+// SUPPRIMER PLAT
+
+async function deleteDish(id){
+
+const confirmDelete = confirm("Supprimer ce plat ?");
+
+if(!confirmDelete) return;
+
+const { error } = await client
+.from("dishes")
+.delete()
+.eq("id", id);
+
+if(error){
+alert("Erreur : " + error.message);
+return;
+}
+
+loadDishes();
+
+}
+
+
+// MODIFIER (vide pour le moment)
+
+function editDish(id){
+
+console.log("Modifier plat :", id);
+
+}
+
+
+// TAP MOBILE POUR AFFICHER BOUTONS
+
+document.addEventListener("click", function(e){
+
+const card = e.target.closest(".dish-card");
+
+document.querySelectorAll(".dish-actions").forEach(el=>{
+el.style.opacity = "0";
+});
+
+if(card){
+
+const actions = card.querySelector(".dish-actions");
+
+if(actions){
+actions.style.opacity = "1";
+}
+
+}
+
+});
 
 
 // AJOUT PLAT
@@ -161,7 +226,6 @@ const available = document.getElementById("available").checked;
 const image_url = document.getElementById("image_url").value.trim();
 
 const { error } = await client.from("dishes").insert([
-
 {
 name,
 category,
@@ -172,7 +236,6 @@ ingredients,
 available,
 image_url
 }
-
 ]);
 
 if(error){
