@@ -2,86 +2,109 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Menu</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Menu</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 <body>
 
-    <div id="login-section">
+<h1>Administration Menu</h1>
 
-        <h2>Connexion Admin</h2>
+<!-- LOGIN ADMIN -->
 
-        <input type="email" id="admin-email" placeholder="Email">
+<div id="login-section">
 
-        <input type="password" id="admin-password" placeholder="Mot de passe">
+<h2>Connexion Admin</h2>
 
-        <button onclick="loginAdmin()">Se connecter</button>
+<input type="email" id="admin-email" placeholder="Email">
 
-        <p id="login-message"></p>
+<input type="password" id="admin-password" placeholder="Mot de passe">
 
-    </div>
+<button onclick="loginAdmin()">Se connecter</button>
 
-    <h1>Administration Menu</h1>
+<p id="login-message"></p>
 
-    <h2>Ajouter un plat</h2>
+</div>
 
-    <form id="dish-form">
 
-        <input type="text" id="name" placeholder="Nom du plat" required>
+<!-- PANEL ADMIN -->
 
-        <select id="category">
-            <option value="entree">Entrée</option>
-            <option value="plat">Plat</option>
-            <option value="dessert">Dessert</option>
-            <option value="boisson">Boisson</option>
-        </select>
+<div id="admin-panel" style="display:none;">
 
-        <input type="text" id="subcategory" placeholder="Sous catégorie">
+<button onclick="logoutAdmin()">Se déconnecter</button>
 
-        <!-- Champ pour le lien de l'image -->
-        <input type="url" id="image_url" placeholder="Coller le lien de l'image ici">
+<h2>Ajouter un plat</h2>
 
-        <input type="number" id="price" placeholder="Prix" step="0.01" required>
+<form id="dish-form">
 
-        <textarea id="description" placeholder="Description"></textarea>
+<input type="text" id="name" placeholder="Nom du plat" required>
 
-        <textarea id="ingredients" placeholder="Ingrédients"></textarea>
+<select id="category">
+<option value="entree">Entrée</option>
+<option value="plat">Plat</option>
+<option value="dessert">Dessert</option>
+<option value="boisson">Boisson</option>
+</select>
 
-        <label>
-            Disponible
-            <input type="checkbox" id="available" checked>
-        </label>
+<input type="text" id="subcategory" placeholder="Sous catégorie">
 
-        <button type="submit">Ajouter</button>
+<input type="url" id="image_url" placeholder="Lien de l'image">
 
-    </form>
+<input type="number" id="price" placeholder="Prix" step="0.01" required>
 
-    <!-- Aperçu instantané de l'image -->
-    <div id="image-preview" style="margin-top: 10px;"></div>
+<textarea id="description" placeholder="Description"></textarea>
 
-    <h2>Liste des plats</h2>
-    <div id="dish-list"></div>
+<textarea id="ingredients" placeholder="Ingrédients"></textarea>
 
-    <script src="app.js"></script>
-    <script>
-        // Aperçu instantané de l'image
-        const imageInput = document.getElementById("image_url");
-        const preview = document.getElementById("image-preview");
+<label>
+Disponible
+<input type="checkbox" id="available" checked>
+</label>
 
-        imageInput.addEventListener("input", () => {
-            const url = imageInput.value.trim();
-            if (url) {
-                preview.innerHTML = `<img src="${url}" alt="Aperçu" style="max-width:200px; max-height:200px;">`;
-            } else {
-                preview.innerHTML = "";
-            }
-        });
-    </script>
+<button type="submit">Ajouter</button>
+
+</form>
+
+<div id="image-preview"></div>
+
+<h2>Liste des plats</h2>
+
+<div id="dish-list"></div>
+
+</div>
+
+<script src="app.js"></script>
+
+<script>
+
+const imageInput = document.getElementById("image_url");
+const preview = document.getElementById("image-preview");
+
+imageInput.addEventListener("input", () => {
+
+const url = imageInput.value.trim();
+
+if(url){
+
+preview.innerHTML = `<img src="${url}" style="max-width:200px">`;
+
+}else{
+
+preview.innerHTML = "";
+
+}
+
+});
+
+</script>
 
 </body>
-
 </html>
