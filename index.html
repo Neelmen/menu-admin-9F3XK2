@@ -2,61 +2,70 @@
 <html lang="fr">
 
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Admin Menu</title>
-
-<link rel="stylesheet" href="style.css">
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Menu</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
 
-<h1>Administration Menu</h1>
+    <h1>Administration Menu</h1>
 
-<h2>Ajouter un plat</h2>
+    <h2>Ajouter un plat</h2>
 
-<form id="dish-form">
+    <form id="dish-form">
 
-<input type="text" id="name" placeholder="Nom du plat" required>
+        <input type="text" id="name" placeholder="Nom du plat" required>
 
-<select id="category">
-<option value="entree">Entrée</option>
-<option value="plat">Plat</option>
-<option value="dessert">Dessert</option>
-<option value="boisson">Boisson</option>
-</select>
+        <select id="category">
+            <option value="entree">Entrée</option>
+            <option value="plat">Plat</option>
+            <option value="dessert">Dessert</option>
+            <option value="boisson">Boisson</option>
+        </select>
 
-<input type="text" id="subcategory" placeholder="Sous catégorie">
+        <input type="text" id="subcategory" placeholder="Sous catégorie">
 
-<input type="text" id="image_url" placeholder="Coller le lien de l'image ici">
+        <input type="url" id="image_url" placeholder="Coller le lien de l'image ici">
 
-<input type="number" id="price" placeholder="Prix">
+        <input type="number" id="price" placeholder="Prix" step="0.01" required>
 
-<textarea id="description" placeholder="Description"></textarea>
+        <textarea id="description" placeholder="Description"></textarea>
 
-<textarea id="ingredients" placeholder="Ingrédients"></textarea>
+        <textarea id="ingredients" placeholder="Ingrédients"></textarea>
 
-<input type="file" id="image">
+        <label>
+            Disponible
+            <input type="checkbox" id="available" checked>
+        </label>
 
-<label>
-Disponible
-<input type="checkbox" id="available" checked>
-</label>
+        <button type="submit">Ajouter</button>
 
-<button type="submit">Ajouter</button>
+    </form>
 
-</form>
+    <!-- Aperçu de l'image collée -->
+    <div id="image-preview" style="margin-top: 10px;"></div>
 
-<h2>Liste des plats</h2>
+    <h2>Liste des plats</h2>
+    <div id="dish-list"></div>
 
-<div id="dish-list"></div>
+    <script src="app.js"></script>
+    <script>
+        // Aperçu instantané de l'image
+        const imageInput = document.getElementById("image_url");
+        const preview = document.getElementById("image-preview");
 
-<script src="app.js"></script>
+        imageInput.addEventListener("input", () => {
+            const url = imageInput.value.trim();
+            if (url) {
+                preview.innerHTML = `<img src="${url}" alt="Aperçu" style="max-width:200px; max-height:200px;">`;
+            } else {
+                preview.innerHTML = "";
+            }
+        });
+    </script>
 
 </body>
 
