@@ -1,0 +1,18 @@
+body{
+font-family: Arial;
+max-width:600px;
+margin:auto;
+padding:20px;
+}
+
+input,select,textarea,button{
+width:100%;
+margin:10px 0;
+padding:10px;
+}
+
+#dish-list div{
+border:1px solid #ccc;
+padding:10px;
+margin:10px 0;
+}
