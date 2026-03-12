@@ -1,188 +1,190 @@
-/* ===============================
-   Styles généraux
-================================= */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: #f0f0f5; /* fond doux pour admin */
-    text-align: center;
-    color: #333;
+const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
+const SUPABASE_KEY = "TA_CLE_PUBLISHABLE";
+
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+
+// INITIALISATION AU CHARGEMENT DE LA PAGE
+
+document.addEventListener("DOMContentLoaded", () => {
+
+document.getElementById("admin-panel").style.display = "none";
+document.getElementById("login-section").style.display = "block";
+
+checkSession();
+
+});
+
+
+
+// LOGIN ADMIN
+
+async function loginAdmin(){
+
+const email = document.getElementById("admin-email").value;
+const password = document.getElementById("admin-password").value;
+
+const { data, error } = await client.auth.signInWithPassword({
+email: email,
+password: password
+});
+
+if(error){
+
+document.getElementById("login-message").innerText =
+"Erreur : " + error.message;
+
+}else{
+
+document.getElementById("login-section").style.display = "none";
+document.getElementById("admin-panel").style.display = "block";
+
+loadDishes();
+
 }
 
-h1 {
-    margin-bottom: 20px;
-    color: #2b2b2b;
 }
 
-/* ===============================
-   Login admin
-================================= */
-#login-section {
-    background: white;
-    display: inline-block;
-    padding: 30px 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+
+// LOGOUT
+
+async function logoutAdmin(){
+
+await client.auth.signOut();
+
+location.reload();
+
 }
 
-#login-section input {
-    display: block;
-    width: 250px;
-    padding: 12px;
-    margin: 10px auto;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
+
+
+// VERIFICATION SESSION
+
+async function checkSession(){
+
+const { data } = await client.auth.getSession();
+
+if(data.session){
+
+document.getElementById("login-section").style.display = "none";
+document.getElementById("admin-panel").style.display = "block";
+
+loadDishes();
+
 }
 
-#login-section button {
-    background: #2b2b2b;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
 
-#login-section button:hover {
-    background: #e63946;
+
+
+// CHARGER LES PLATS
+
+async function loadDishes(){
+
+const { data, error } = await client
+.from("dishes")
+.select("*")
+.order("created_at", { ascending: false });
+
+if(error){
+
+console.error(error);
+return;
+
 }
 
-/* ===============================
-   Admin panel
-================================= */
-#admin-panel {
-    max-width: 900px;
-    margin: auto;
+const container = document.getElementById("dish-list");
+
+container.innerHTML = "";
+
+data.forEach(dish => {
+
+const div = document.createElement("div");
+
+div.style.border = "1px solid #ccc";
+div.style.padding = "10px";
+div.style.marginBottom = "10px";
+
+div.innerHTML = `
+
+<b>${dish.name}</b> - ${dish.category} - ${dish.price}€
+
+<button onclick="toggleDish('${dish.id}', ${dish.available})">
+${dish.available ? "Désactiver" : "Activer"}
+</button>
+
+${dish.image_url ? `<br><img src="${dish.image_url}" style="max-width:150px">` : ""}
+
+<p>${dish.description || ""}</p>
+
+<p><i>${dish.ingredients || ""}</i></p>
+
+`;
+
+container.appendChild(div);
+
+});
+
 }
 
-/* Déconnexion */
-#admin-panel > button {
-    background: #e63946;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+
+
+// ACTIVER / DESACTIVER
+
+async function toggleDish(id, status){
+
+await client
+.from("dishes")
+.update({ available: !status })
+.eq("id", id);
+
+loadDishes();
+
 }
 
-#admin-panel > button:hover {
-    background: #b91c2e;
+
+
+// AJOUT PLAT
+
+document.getElementById("dish-form").addEventListener("submit", async e => {
+
+e.preventDefault();
+
+const name = document.getElementById("name").value.trim();
+const category = document.getElementById("category").value;
+const subcategory = document.getElementById("subcategory").value.trim();
+const price = parseFloat(document.getElementById("price").value);
+const description = document.getElementById("description").value.trim();
+const ingredients = document.getElementById("ingredients").value.trim();
+const available = document.getElementById("available").checked;
+const image_url = document.getElementById("image_url").value.trim();
+
+const { error } = await client.from("dishes").insert([
+
+{
+name,
+category,
+subcategory,
+price,
+description,
+ingredients,
+available,
+image_url
 }
 
-/* ===============================
-   Formulaire ajout plat
-================================= */
-#dish-form {
-    background: white;
-    padding: 25px 30px;
-    border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    text-align: left;
+]);
+
+if(error){
+
+alert("Erreur : " + error.message);
+return;
+
 }
 
-#dish-form input,
-#dish-form select,
-#dish-form textarea {
-    width: calc(100% - 20px);
-    margin: 8px 0;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    display: block;
-}
+document.getElementById("dish-form").reset();
+document.getElementById("image-preview").innerHTML = "";
 
-#dish-form button {
-    background: #2b2b2b;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 15px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 15px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-}
+loadDishes();
 
-#dish-form button:hover {
-    background: #e63946;
-}
-
-/* ===============================
-   Aperçu image
-================================= */
-#image-preview img {
-    max-width: 200px;
-    margin-top: 10px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-/* ===============================
-   Liste des plats (cartes)
-================================= */
-#dish-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
-
-#dish-list > div {
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    width: 250px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    text-align: left;
-    transition: transform 0.2s;
-}
-
-#dish-list > div:hover {
-    transform: translateY(-5px);
-}
-
-#dish-list img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-#dish-list button {
-    background: #2b2b2b;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 8px;
-}
-
-#dish-list button:hover {
-    background: #e63946;
-}
-
-/* ===============================
-   Responsive
-================================= */
-@media (max-width: 600px) {
-    #dish-list {
-        flex-direction: column;
-        align-items: center;
-    }
-
-    #dish-form input,
-    #dish-form select,
-    #dish-form textarea {
-        width: 95%;
-    }
-}
+});
