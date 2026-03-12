@@ -1,10 +1,14 @@
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9heHBvZmttdHJ1ZHJpeXJieHZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NjYwOTMsImV4cCI6MjA4ODU0MjA5M30.F6BuGU57CG1GBi-xKxhlJ_9wIOikKECi0vb0RBEIGrw";
+
+const SUPABASE_KEY = "TA_CLE_ANON_PUBLIC";
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 
-// INITIALISATION AU CHARGEMENT DE LA PAGE
+
+/* ===============================
+   Initialisation
+================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -17,16 +21,18 @@ checkSession();
 
 
 
-// LOGIN ADMIN
+/* ===============================
+   Login
+================================= */
 
 async function loginAdmin(){
 
 const email = document.getElementById("admin-email").value;
 const password = document.getElementById("admin-password").value;
 
-const { data, error } = await client.auth.signInWithPassword({
-email: email,
-password: password
+const { error } = await client.auth.signInWithPassword({
+email,
+password
 });
 
 if(error){
@@ -47,7 +53,9 @@ loadDishes();
 
 
 
-// LOGOUT
+/* ===============================
+   Logout
+================================= */
 
 async function logoutAdmin(){
 
@@ -59,7 +67,9 @@ location.reload();
 
 
 
-// VERIFICATION SESSION
+/* ===============================
+   Vérification session
+================================= */
 
 async function checkSession(){
 
@@ -78,47 +88,64 @@ loadDishes();
 
 
 
-// CHARGER LES PLATS
+/* ===============================
+   Charger les plats
+================================= */
 
 async function loadDishes(){
 
 const { data, error } = await client
 .from("dishes")
 .select("*")
-.order("created_at", { ascending: false });
+.order("created_at",{ascending:false});
 
 if(error){
-
 console.error(error);
 return;
-
 }
 
 const container = document.getElementById("dish-list");
-
 container.innerHTML = "";
 
 data.forEach(dish => {
 
 const div = document.createElement("div");
-
-div.style.border = "1px solid #ccc";
-div.style.padding = "10px";
-div.style.marginBottom = "10px";
+div.className = "dish-card";
 
 div.innerHTML = `
 
-<b>${dish.name}</b> - ${dish.category} - ${dish.price}€
+${dish.image_url ? `<img src="${dish.image_url}">` : ""}
 
-<button onclick="toggleDish('${dish.id}', ${dish.available})">
+<div class="card-actions">
+
+<button class="btn-toggle"
+onclick="toggleDish('${dish.id}', ${dish.available})">
+
 ${dish.available ? "Désactiver" : "Activer"}
+
 </button>
 
-${dish.image_url ? `<br><img src="${dish.image_url}" style="max-width:150px">` : ""}
+<button class="btn-edit">
+Modifier
+</button>
+
+<button class="btn-delete"
+onclick="deleteDish('${dish.id}')">
+
+Supprimer
+
+</button>
+
+</div>
+
+<div style="padding:10px">
+
+<b>${dish.name}</b><br>
+${dish.category} - ${dish.price}€
 
 <p>${dish.description || ""}</p>
 
-<p><i>${dish.ingredients || ""}</i></p>
+</div>
 
 `;
 
@@ -130,14 +157,16 @@ container.appendChild(div);
 
 
 
-// ACTIVER / DESACTIVER
+/* ===============================
+   Activer / désactiver
+================================= */
 
-async function toggleDish(id, status){
+async function toggleDish(id,status){
 
 await client
 .from("dishes")
-.update({ available: !status })
-.eq("id", id);
+.update({available:!status})
+.eq("id",id);
 
 loadDishes();
 
@@ -145,7 +174,33 @@ loadDishes();
 
 
 
-// AJOUT PLAT
+/* ===============================
+   Supprimer plat
+================================= */
+
+async function deleteDish(id){
+
+if(!confirm("Supprimer ce plat ?")) return;
+
+const { error } = await client
+.from("dishes")
+.delete()
+.eq("id",id);
+
+if(error){
+alert("Erreur : " + error.message);
+return;
+}
+
+loadDishes();
+
+}
+
+
+
+/* ===============================
+   Ajouter plat
+================================= */
 
 document.getElementById("dish-form").addEventListener("submit", async e => {
 
@@ -161,7 +216,6 @@ const available = document.getElementById("available").checked;
 const image_url = document.getElementById("image_url").value.trim();
 
 const { error } = await client.from("dishes").insert([
-
 {
 name,
 category,
@@ -172,7 +226,6 @@ ingredients,
 available,
 image_url
 }
-
 ]);
 
 if(error){
