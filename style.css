@@ -1,188 +1,228 @@
 /* ===============================
    Styles généraux
 ================================= */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background: #f0f0f5; /* fond doux pour admin */
-    text-align: center;
-    color: #333;
+
+body{
+font-family: Arial, sans-serif;
+margin:0;
+padding:20px;
+background:#f0f0f5;
+text-align:center;
+color:#333;
 }
 
-h1 {
-    margin-bottom: 20px;
-    color: #2b2b2b;
+h1{
+margin-bottom:20px;
 }
 
 /* ===============================
-   Login admin
+   Login
 ================================= */
-#login-section {
-    background: white;
-    display: inline-block;
-    padding: 30px 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+#login-section{
+background:white;
+display:inline-block;
+padding:30px 40px;
+border-radius:15px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
 }
 
-#login-section input {
-    display: block;
-    width: 250px;
-    padding: 12px;
-    margin: 10px auto;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 16px;
+#login-section input{
+display:block;
+width:250px;
+padding:12px;
+margin:10px auto;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
 }
 
-#login-section button {
-    background: #2b2b2b;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 10px;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+#login-section button{
+background:#2b2b2b;
+color:white;
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
 }
 
-#login-section button:hover {
-    background: #e63946;
+#login-section button:hover{
+background:#e63946;
 }
 
 /* ===============================
    Admin panel
 ================================= */
-#admin-panel {
-    max-width: 900px;
-    margin: auto;
+
+#admin-panel{
+max-width:1000px;
+margin:auto;
 }
 
-/* Déconnexion */
-#admin-panel > button {
-    background: #e63946;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-}
+/* bouton logout */
 
-#admin-panel > button:hover {
-    background: #b91c2e;
+#admin-panel > button{
+background:#e63946;
+color:white;
+border:none;
+padding:12px 25px;
+border-radius:25px;
+cursor:pointer;
+margin-bottom:20px;
 }
 
 /* ===============================
-   Formulaire ajout plat
+   Formulaire
 ================================= */
-#dish-form {
-    background: white;
-    padding: 25px 30px;
-    border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    text-align: left;
+
+#dish-form{
+background:white;
+padding:25px;
+border-radius:15px;
+margin-bottom:30px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+text-align:left;
 }
 
 #dish-form input,
 #dish-form select,
-#dish-form textarea {
-    width: calc(100% - 20px);
-    margin: 8px 0;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    display: block;
+#dish-form textarea{
+
+width:100%;
+margin:8px 0;
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+font-size:16px;
+
 }
 
-#dish-form button {
-    background: #2b2b2b;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 15px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 15px;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+#dish-form button{
+
+background:#2b2b2b;
+color:white;
+border:none;
+padding:12px 20px;
+border-radius:15px;
+cursor:pointer;
+
 }
 
-#dish-form button:hover {
-    background: #e63946;
+#dish-form button:hover{
+background:#e63946;
 }
 
 /* ===============================
    Aperçu image
 ================================= */
-#image-preview img {
-    max-width: 200px;
-    margin-top: 10px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+
+#image-preview img{
+max-width:200px;
+margin-top:10px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.3);
 }
 
 /* ===============================
-   Liste des plats (cartes)
+   Liste plats
 ================================= */
-#dish-list {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-}
 
-#dish-list > div {
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    width: 250px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    text-align: left;
-    transition: transform 0.2s;
-}
-
-#dish-list > div:hover {
-    transform: translateY(-5px);
-}
-
-#dish-list img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 10px;
-}
-
-#dish-list button {
-    background: #2b2b2b;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    margin-top: 8px;
-}
-
-#dish-list button:hover {
-    background: #e63946;
+#dish-list{
+display:flex;
+flex-wrap:wrap;
+gap:20px;
+justify-content:center;
 }
 
 /* ===============================
-   Responsive
+   Carte plat
 ================================= */
-@media (max-width: 600px) {
-    #dish-list {
-        flex-direction: column;
-        align-items: center;
-    }
 
-    #dish-form input,
-    #dish-form select,
-    #dish-form textarea {
-        width: 95%;
-    }
+.dish-card{
+
+position:relative;
+background:white;
+border-radius:15px;
+overflow:hidden;
+width:250px;
+
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+
+}
+
+.dish-card img{
+
+width:100%;
+height:150px;
+object-fit:cover;
+
+}
+
+/* ===============================
+   Overlay boutons
+================================= */
+
+.card-actions{
+
+position:absolute;
+
+top:0;
+left:0;
+right:0;
+bottom:0;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+
+gap:10px;
+
+background:rgba(0,0,0,0.6);
+
+opacity:0;
+transition:opacity 0.25s;
+
+}
+
+.dish-card:hover .card-actions{
+opacity:1;
+}
+
+.dish-card:active .card-actions{
+opacity:1;
+}
+
+/* ===============================
+   Boutons
+================================= */
+
+.card-actions button{
+
+width:140px;
+padding:8px;
+
+border:none;
+border-radius:20px;
+
+font-weight:bold;
+cursor:pointer;
+
+box-shadow:0 4px 10px rgba(0,0,0,0.4);
+
+}
+
+.btn-toggle{
+background:#E69830;
+color:white;
+}
+
+.btn-delete{
+background:#e63946;
+color:white;
+}
+
+.btn-edit{
+background:#2b2b2b;
+color:white;
 }
