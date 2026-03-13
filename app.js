@@ -97,68 +97,71 @@ loadDishes();
 
 
 // CHARGER LES PLATS
+async function loadDishes() {
 
-async function loadDishes(){
+    const { data, error } = await client
+        .from("dishes")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-const { data, error } = await client
-.from("dishes")
-.select("*")
-.order("created_at", { ascending: false });
+    if (error) {
+        console.error(error);
+        return;
+    }
 
-if(error){
+    const container = document.getElementById("dish-list");
+    container.innerHTML = "";
 
-console.error(error);
-return;
+    data.forEach(dish => {
 
-}
+        const div = document.createElement("div");
+        div.className = "dish-card";
 
-const container = document.getElementById("dish-list");
-container.innerHTML = "";
+        // Info plat
+        const infoDiv = document.createElement("div");
+        infoDiv.className = "dish-info";
+        infoDiv.innerHTML = `
+            <b>${dish.name}</b><br>
+            ${dish.category} - ${dish.price}€<br>
+            <p>${dish.description || ""}</p>
+            <p><i>${dish.ingredients || ""}</i></p>
+        `;
 
-data.forEach(dish => {
+        // Image plat
+        const imageDiv = document.createElement("div");
+        imageDiv.className = "dish-image";
 
-const div = document.createElement("div");
-div.className = "dish-card";
+        if (dish.image_url) {
+            const img = document.createElement("img");
+            img.src = dish.image_url;
+            img.style.width = "100%";
+            img.style.borderRadius = "10px";
+            imageDiv.appendChild(img);
+        }
 
-div.innerHTML = `
+        // Boutons overlay
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "dish-actions";
+        actionsDiv.style.opacity = "0"; // invisible par défaut
+        actionsDiv.innerHTML = `
+            <button onclick="toggleDish('${dish.id}', ${dish.available})">
+                ${dish.available ? "Désactiver" : "Activer"}
+            </button>
+            <button onclick="editDish('${dish.id}')">Modifier</button>
+            <button onclick="deleteDish('${dish.id}')">Supprimer</button>
+        `;
+        imageDiv.appendChild(actionsDiv);
 
-<div class="dish-image">
+        // Ajouter hover pour desktop
+        imageDiv.addEventListener("mouseenter", () => actionsDiv.style.opacity = "1");
+        imageDiv.addEventListener("mouseleave", () => actionsDiv.style.opacity = "0");
 
-${dish.image_url ? `<img src="${dish.image_url}">` : ""}
+        // Assemble le card
+        div.appendChild(imageDiv);
+        div.appendChild(infoDiv);
 
-<div class="dish-actions">
-
-<button onclick="toggleDish('${dish.id}', ${dish.available})">
-${dish.available ? "Désactiver" : "Activer"}
-</button>
-
-<button onclick="editDish('${dish.id}')">
-Modifier
-</button>
-
-<button onclick="deleteDish('${dish.id}')">
-Supprimer
-</button>
-
-</div>
-
-</div>
-
-<div class="dish-info">
-
-<b>${dish.name}</b><br>
-${dish.category} - ${dish.price}€<br>
-
-<p>${dish.description || ""}</p>
-<p><i>${dish.ingredients || ""}</i></p>
-
-</div>
-
-`;
-
-container.appendChild(div);
-
-});
+        container.appendChild(div);
+    });
 
 }
 
@@ -277,5 +280,7 @@ document.getElementById("dish-form").reset();
 document.getElementById("image-preview").innerHTML = "";
 
 loadDishes();
+
+  
 
 });
