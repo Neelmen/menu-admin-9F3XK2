@@ -46,6 +46,28 @@ loadDishes();
 
 
 // LOGOUT
+async function uploadImage(file){
+
+const fileExt = file.name.split('.').pop();
+const fileName = Date.now() + "." + fileExt;
+
+const { data, error } = await client.storage
+.from("dishes-images")
+.upload(fileName, file);
+
+if(error){
+alert("Erreur upload : " + error.message);
+return null;
+}
+
+const { data: publicUrl } = client
+.storage
+.from("dishes-images")
+.getPublicUrl(fileName);
+
+return publicUrl.publicUrl;
+
+}
 
 async function logoutAdmin(){
 
