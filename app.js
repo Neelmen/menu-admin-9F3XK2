@@ -245,7 +245,13 @@ const price = parseFloat(document.getElementById("price").value);
 const description = document.getElementById("description").value.trim();
 const ingredients = document.getElementById("ingredients").value.trim();
 const available = document.getElementById("available").checked;
-const image_url = document.getElementById("image_url").value.trim();
+const file = document.getElementById("image_file").files[0];
+
+let image_url = "";
+
+if(file){
+image_url = await uploadImage(file);
+}
 
 const { error } = await client.from("dishes").insert([
 {
