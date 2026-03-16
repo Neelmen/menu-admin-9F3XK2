@@ -2,101 +2,98 @@ const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const BUCKET_NAME = "dishes-images";
 
 
 // INITIALISATION
 document.addEventListener("DOMContentLoaded", () => {
-
     document.getElementById("admin-panel").style.display = "none";
     document.getElementById("login-section").style.display = "block";
-
     checkSession();
-
 });
 
 
 // LOGIN ADMIN
 async function loginAdmin() {
-
     const email = document.getElementById("admin-email").value;
     const password = document.getElementById("admin-password").value;
 
-    const { data, error } = await client.auth.signInWithPassword({
+    const { error } = await client.auth.signInWithPassword({
         email,
         password
     });
 
     if (error) {
-
-        document.getElementById("login-message").innerText =
-            "Erreur : " + error.message;
-
-    } else {
-
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("admin-panel").style.display = "block";
-
-        loadDishes();
-
+        document.getElementById("login-message").innerText = "Erreur : " + error.message;
+        return;
     }
 
+    document.getElementById("login-section").style.display = "none";
+    document.getElementById("admin-panel").style.display = "block";
+
+    loadDishes();
 }
 
 
-// UPLOAD IMAGE
-async function uploadImage(file) {
+// LOGOUT
+async function logoutAdmin() {
+    await client.auth.signOut();
+    location.reload();
+}
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = Date.now() + "." + fileExt;
+
+// SESSION
+async function checkSession() {
+    const { data } = await client.auth.getSession();
+
+    if (data.session) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("admin-panel").style.display = "block";
+        loadDishes();
+    }
+}
+
+
+/* ===============================
+   OUTILS IMAGES
+================================= */
+
+// Upload dans le bucket + retour du chemin fichier
+async function uploadImage(file) {
+    const fileExt = file.name.split(".").pop().toLowerCase();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
     const { error } = await client.storage
-        .from("dishes-images")
-        .upload(fileName, file);
+        .from(BUCKET_NAME)
+        .upload(fileName, file, {
+            cacheControl: "3600",
+            upsert: false
+        });
 
     if (error) {
         alert("Erreur upload : " + error.message);
         return null;
     }
 
-    const { data } = client
-        .storage
-        .from("dishes-images")
-        .getPublicUrl(fileName);
+    return fileName; // on retourne le path, pas l'URL publique
+}
 
-    return data.publicUrl;
+// Construit l'URL publique à partir du path
+function getImagePublicUrl(imagePath) {
+    if (!imagePath) return "";
 
+    const { data } = client.storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(imagePath);
+
+    return data?.publicUrl || "";
 }
 
 
-// LOGOUT
-async function logoutAdmin() {
-
-    await client.auth.signOut();
-    location.reload();
-
-}
-
-
-// SESSION
-async function checkSession() {
-
-    const { data } = await client.auth.getSession();
-
-    if (data.session) {
-
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("admin-panel").style.display = "block";
-
-        loadDishes();
-
-    }
-
-}
-
-
-// CHARGER LES PLATS
+/* ===============================
+   CHARGER LES PLATS
+================================= */
 async function loadDishes() {
-
     const { data, error } = await client
         .from("dishes")
         .select("*")
@@ -112,53 +109,38 @@ async function loadDishes() {
     const container = document.getElementById("dish-list");
     container.innerHTML = "";
 
-
-    // séparation des plats
     const activeDishes = data.filter(d => d.available);
     const inactiveDishes = data.filter(d => !d.available);
 
-
     renderDishGroup(activeDishes, container);
 
-
-    // séparation visuelle si plats désactivés
     if (inactiveDishes.length > 0) {
-
         const separator = document.createElement("hr");
         separator.className = "admin-separator";
         separator.style.margin = "50px 0";
-
         container.appendChild(separator);
 
         renderDishGroup(inactiveDishes, container, true);
-
     }
-
 }
 
 
-// RENDU DES GROUPES
+/* ===============================
+   RENDU DES GROUPES
+================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
-
     let currentCategory = null;
     let grid = null;
 
     dishes.forEach(dish => {
-
-
         if (dish.category !== currentCategory) {
-
             currentCategory = dish.category;
 
             grid = document.createElement("div");
             grid.className = "dish-grid";
-
             container.appendChild(grid);
-
         }
 
-
-        // CARD
         const card = document.createElement("div");
         card.className = "dish-card";
 
@@ -166,138 +148,137 @@ function renderDishGroup(dishes, container, isInactive = false) {
             card.classList.add("dish-disabled");
         }
 
-
-        // INFO
         const info = document.createElement("div");
         info.className = "dish-info";
-
         info.innerHTML = `
-<b>${dish.name}</b><br>
-${dish.price}€
-`;
+            <b>${dish.name}</b><br>
+            ${dish.price}€
+        `;
 
-
-        // IMAGE
         const imageDiv = document.createElement("div");
         imageDiv.className = "dish-image";
 
-        if (dish.image_url) {
-
+        if (dish.image_path) {
             const img = document.createElement("img");
-            img.src = dish.image_url;
+            img.src = getImagePublicUrl(dish.image_path);
+            img.alt = dish.name || "Image du plat";
             img.style.width = "100%";
             img.style.borderRadius = "10px";
+            img.loading = "lazy";
+
+            img.onerror = () => {
+                console.error("Image introuvable :", dish.image_path);
+                img.style.display = "none";
+            };
 
             imageDiv.appendChild(img);
-
         }
 
-
-        // ACTIONS
         const actions = document.createElement("div");
         actions.className = "dish-actions";
         actions.style.opacity = "0";
 
         actions.innerHTML = `
-<button onclick="toggleDish('${dish.id}', ${dish.available})">
-${dish.available ? "Désactiver" : "Activer"}
-</button>
+            <button onclick="toggleDish('${dish.id}', ${dish.available})">
+                ${dish.available ? "Désactiver" : "Activer"}
+            </button>
 
-<button onclick="editDish('${dish.id}')">
-Modifier
-</button>
+            <button onclick="editDish('${dish.id}')">
+                Modifier
+            </button>
 
-<button onclick="deleteDish('${dish.id}')">
-Supprimer
-</button>
-`;
+            <button onclick="deleteDish('${dish.id}')">
+                Supprimer
+            </button>
+        `;
 
         imageDiv.appendChild(actions);
 
+        imageDiv.addEventListener("mouseenter", () => {
+            actions.style.opacity = "1";
+        });
 
-        // hover
-        imageDiv.addEventListener("mouseenter", () => actions.style.opacity = "1");
-        imageDiv.addEventListener("mouseleave", () => actions.style.opacity = "0");
+        imageDiv.addEventListener("mouseleave", () => {
+            actions.style.opacity = "0";
+        });
 
-
-        // assemblage
         card.appendChild(imageDiv);
         card.appendChild(info);
-
         grid.appendChild(card);
-
     });
-
 }
 
 
-// ACTIVER / DESACTIVER
+/* ===============================
+   ACTIVER / DESACTIVER
+================================= */
 async function toggleDish(id, status) {
-
     await client
         .from("dishes")
         .update({ available: !status })
         .eq("id", id);
 
     loadDishes();
-
 }
 
 
-// SUPPRIMER PLAT + IMAGE
+/* ===============================
+   SUPPRIMER PLAT + IMAGE
+================================= */
 async function deleteDish(id) {
-
     const confirmDelete = confirm("Supprimer ce plat et son image ?");
     if (!confirmDelete) return;
 
     try {
-
-        const { data: dishData } = await client
+        const { data: dishData, error: fetchError } = await client
             .from("dishes")
-            .select("image_url")
+            .select("image_path")
             .eq("id", id)
             .single();
 
-        const imageUrl = dishData.image_url;
-
-        if (imageUrl) {
-
-            const url = new URL(imageUrl);
-            const prefix = "/storage/v1/object/public/dishes-images/";
-
-            let filePath = url.pathname.replace(prefix, "");
-
-            await client.storage
-                .from("dishes-images")
-                .remove([filePath]);
-
+        if (fetchError) {
+            throw fetchError;
         }
 
-        await client
+        if (dishData?.image_path) {
+            const { error: removeError } = await client.storage
+                .from(BUCKET_NAME)
+                .remove([dishData.image_path]);
+
+            if (removeError) {
+                console.error("Erreur suppression image :", removeError.message);
+            }
+        }
+
+        const { error: deleteError } = await client
             .from("dishes")
             .delete()
             .eq("id", id);
 
+        if (deleteError) {
+            throw deleteError;
+        }
+
         loadDishes();
 
     } catch (err) {
-
         alert("Erreur : " + err.message);
-
     }
-
 }
 
 
-// EDIT
+/* ===============================
+   EDIT
+================================= */
 function editDish(id) {
     console.log("Modifier plat :", id);
 }
 
 
-// TAP MOBILE
+/* ===============================
+   TAP MOBILE
+================================= */
 document.addEventListener("click", function (e) {
-
     const card = e.target.closest(".dish-card");
 
     document.querySelectorAll(".dish-actions").forEach(el => {
@@ -305,21 +286,18 @@ document.addEventListener("click", function (e) {
     });
 
     if (card) {
-
         const actions = card.querySelector(".dish-actions");
-
         if (actions) {
             actions.style.opacity = "1";
         }
-
     }
-
 });
 
 
-// AJOUT PLAT
-document.getElementById("dish-form").addEventListener("submit", async e => {
-
+/* ===============================
+   AJOUT PLAT
+================================= */
+document.getElementById("dish-form").addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const name = document.getElementById("name").value.trim();
@@ -331,13 +309,14 @@ document.getElementById("dish-form").addEventListener("submit", async e => {
     const available = document.getElementById("available").checked;
     const file = document.getElementById("image_file").files[0];
 
-    let image_url = "";
+    let image_path = null;
 
     if (file) {
-        image_url = await uploadImage(file);
+        image_path = await uploadImage(file);
+        if (!image_path) return;
     }
 
-    await client.from("dishes").insert([
+    const { error } = await client.from("dishes").insert([
         {
             name,
             category,
@@ -346,12 +325,15 @@ document.getElementById("dish-form").addEventListener("submit", async e => {
             description,
             ingredients,
             available,
-            image_url
+            image_path
         }
     ]);
 
+    if (error) {
+        alert("Erreur ajout plat : " + error.message);
+        return;
+    }
+
     document.getElementById("dish-form").reset();
-
     loadDishes();
-
 });
