@@ -3,12 +3,8 @@
 // ================================
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
-
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ================================
-// LOGIN ADMIN
-// ================================
 // ================================
 // LOGIN ADMIN
 // ================================
@@ -19,17 +15,9 @@ async function loginAdmin() {
     const { data, error } = await client.auth.signInWithPassword({ email, password });
 
     if (error) {
-        let message = "Erreur : Identifiant ou mot de passe incorrect";
-
-        // Tu peux raffiner selon le code d'erreur si besoin
-        if (error.message.includes("invalid login credentials")) {
-            message = "Identifiant ou mot de passe non reconnu";
-        } else if (error.message.includes("user not found")) {
-            message = "Compte introuvable";
-        }
-
+        let message = "Identifiant ou mot de passe non reconnu";
+        if (error.message.includes("user not found")) message = "Compte introuvable";
         document.getElementById("login-message").innerText = message;
-
     } else {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("admin-panel").style.display = "block";
@@ -62,7 +50,7 @@ async function logoutAdmin() {
 // ================================
 async function uploadImage(file) {
     const fileExt = file.name.split(".").pop();
-    const fileName = Date.now() + "." + fileExt;
+    const fileName = Date.now() + "." + fileExt; // nom unique
 
     const { error } = await client.storage.from("dishes-images").upload(fileName, file);
     if (error) {
@@ -70,8 +58,7 @@ async function uploadImage(file) {
         return null;
     }
 
-    const { data } = client.storage.from("dishes-images").getPublicUrl(fileName);
-    return data.publicUrl; // on renvoie l'URL publique
+    return fileName; // on renvoie uniquement le nom du fichier pour image_path
 }
 
 // ================================
@@ -137,15 +124,13 @@ async function deleteDish(id, imagePath) {
         }
 
         // Supprimer le plat dans la table
-        const { error: deleteError } = await client
-            .from("dishes")
+        const { error: deleteError } = await client.from("dishes")
             .delete()
             .eq("id", id);
 
         if (deleteError) throw deleteError;
 
         loadDishes();
-
     } catch (err) {
         alert("Erreur : " + err.message);
     }
@@ -183,9 +168,9 @@ document.getElementById("dish-form").addEventListener("submit", async e => {
 
     let image_path = "";
     if (file) {
-        const publicUrl = await uploadImage(file);
-        // On stocke le nom de fichier dans image_path
-        image_path = file.name; // ou remplacer par Date.now()+ext si tu veux unique
+        const uploadedFileName = await uploadImage(file);
+        if (!uploadedFileName) return;
+        image_path = uploadedFileName;
     }
 
     const { error } = await client.from("dishes").insert([{
