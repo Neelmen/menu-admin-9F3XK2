@@ -1,13 +1,11 @@
 // ================================
-// app-admin.js - Pannel admin
+// app-admin.js corrigé
 // ================================
 const SUPABASE_URL = "https://oaxpofkmtrudriyrbxvy.supabase.co";
 const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ================================
 // LOGIN ADMIN
-// ================================
 async function loginAdmin() {
     const email = document.getElementById("admin-email").value;
     const password = document.getElementById("admin-password").value;
@@ -25,9 +23,7 @@ async function loginAdmin() {
     }
 }
 
-// ================================
 // CHECK SESSION
-// ================================
 async function checkSession() {
     const { data } = await client.auth.getSession();
     if (data.session) {
@@ -37,33 +33,24 @@ async function checkSession() {
     }
 }
 
-// ================================
 // LOGOUT
-// ================================
 async function logoutAdmin() {
     await client.auth.signOut();
     location.reload();
 }
 
-// ================================
 // UPLOAD IMAGE
-// ================================
 async function uploadImage(file) {
-    const fileExt = file.name.split(".").pop();
-    const fileName = Date.now() + "." + fileExt; // nom unique
+    const ext = file.name.split(".").pop();
+    const filename = Date.now() + "." + ext;
 
-    const { error } = await client.storage.from("dishes-images").upload(fileName, file);
-    if (error) {
-        alert("Erreur upload : " + error.message);
-        return null;
-    }
+    const { error } = await client.storage.from("dishes-images").upload(filename, file);
+    if (error) { alert("Erreur upload : " + error.message); return null; }
 
-    return fileName; // on renvoie uniquement le nom du fichier pour image_path
+    return filename; // stocke juste le nom du fichier
 }
 
-// ================================
 // LOAD DISHES
-// ================================
 async function loadDishes() {
     const { data, error } = await client.from("dishes").select("*").order("category");
     if (error) { console.error(error); return; }
@@ -82,6 +69,7 @@ async function loadDishes() {
             img.alt = dish.name;
             img.style.width = "100%";
             img.style.borderRadius = "10px";
+            img.style.pointerEvents = "none"; // permet aux boutons d’être cliquables
             card.appendChild(img);
         }
 
@@ -107,53 +95,32 @@ async function loadDishes() {
     });
 }
 
-// ================================
 // DELETE DISH + IMAGE
-// ================================
 async function deleteDish(id, imagePath) {
-    const confirmDelete = confirm("Supprimer ce plat et son image ?");
-    if (!confirmDelete) return;
+    if (!confirm("Supprimer ce plat et son image ?")) return;
 
     try {
-        // Supprimer l'image si elle existe
         if (imagePath) {
-            const { error: removeError } = await client.storage
-                .from("dishes-images")
-                .remove([imagePath]);
-            if (removeError) console.warn("Erreur suppression image:", removeError.message);
+            const { error } = await client.storage.from("dishes-images").remove([imagePath]);
+            if (error) console.warn("Erreur suppression image:", error.message);
         }
-
-        // Supprimer le plat dans la table
-        const { error: deleteError } = await client.from("dishes")
-            .delete()
-            .eq("id", id);
-
-        if (deleteError) throw deleteError;
+        const { error: delError } = await client.from("dishes").delete().eq("id", id);
+        if (delError) throw delError;
 
         loadDishes();
-    } catch (err) {
-        alert("Erreur : " + err.message);
-    }
+    } catch (err) { alert("Erreur : " + err.message); }
 }
 
-// ================================
 // TOGGLE AVAILABILITY
-// ================================
 async function toggleDish(id, status) {
     await client.from("dishes").update({ available: !status }).eq("id", id);
     loadDishes();
 }
 
-// ================================
 // EDIT
-// ================================
-function editDish(id) {
-    console.log("Modifier plat :", id);
-}
+function editDish(id) { console.log("Modifier plat :", id); }
 
-// ================================
 // AJOUT PLAT
-// ================================
 document.getElementById("dish-form").addEventListener("submit", async e => {
     e.preventDefault();
 
@@ -168,25 +135,20 @@ document.getElementById("dish-form").addEventListener("submit", async e => {
 
     let image_path = "";
     if (file) {
-        const uploadedFileName = await uploadImage(file);
-        if (!uploadedFileName) return;
-        image_path = uploadedFileName;
+        const uploaded = await uploadImage(file);
+        if (!uploaded) return;
+        image_path = uploaded;
     }
 
     const { error } = await client.from("dishes").insert([{
         name, category, subcategory, price, description, ingredients, available, image_path
     }]);
 
-    if (error) {
-        alert("Erreur : " + error.message);
-        return;
-    }
+    if (error) { alert("Erreur : " + error.message); return; }
 
     document.getElementById("dish-form").reset();
     loadDishes();
 });
 
-// ================================
 // INIT ADMIN
-// ================================
 document.addEventListener("DOMContentLoaded", checkSession);
