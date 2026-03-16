@@ -4,19 +4,43 @@ const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const BUCKET_NAME = "dishes-images";
 
-
-// INITIALISATION
+/* ===============================
+   INITIALISATION
+================================= */
 document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("admin-panel").style.display = "none";
-    document.getElementById("login-section").style.display = "block";
+    const adminPanel = document.getElementById("admin-panel");
+    const loginSection = document.getElementById("login-section");
+    const dishForm = document.getElementById("dish-form");
+
+    if (adminPanel) adminPanel.style.display = "none";
+    if (loginSection) loginSection.style.display = "block";
+
     checkSession();
+
+    if (dishForm) {
+        dishForm.addEventListener("submit", handleDishSubmit);
+    }
 });
 
-
-// LOGIN ADMIN
+/* ===============================
+   LOGIN ADMIN
+================================= */
 async function loginAdmin() {
-    const email = document.getElementById("admin-email").value;
-    const password = document.getElementById("admin-password").value;
+    const emailInput = document.getElementById("admin-email");
+    const passwordInput = document.getElementById("admin-password");
+    const loginMessage = document.getElementById("login-message");
+
+    const email = emailInput?.value?.trim() || "";
+    const password = passwordInput?.value || "";
+
+    if (loginMessage) loginMessage.innerText = "";
+
+    if (!email || !password) {
+        if (loginMessage) {
+            loginMessage.innerText = "Veuillez renseigner votre identifiant et votre mot de passe.";
+        }
+        return;
+    }
 
     const { error } = await client.auth.signInWithPassword({
         email,
@@ -24,44 +48,74 @@ async function loginAdmin() {
     });
 
     if (error) {
-        document.getElementById("login-message").innerText = "Erreur : " + error.message;
+        let message = "Identifiant ou mot de passe non reconnu.";
+
+        const errorText = (error.message || "").toLowerCase();
+
+        if (
+            errorText.includes("invalid login credentials") ||
+            errorText.includes("invalid credentials")
+        ) {
+            message = "Identifiant ou mot de passe non reconnu.";
+        } else if (errorText.includes("email not confirmed")) {
+            message = "Adresse e-mail non confirmée.";
+        } else if (errorText.includes("too many requests")) {
+            message = "Trop de tentatives de connexion. Réessayez dans quelques instants.";
+        } else if (errorText.includes("network")) {
+            message = "Problème de connexion réseau. Vérifiez votre connexion internet.";
+        }
+
+        if (loginMessage) loginMessage.innerText = message;
         return;
     }
 
-    document.getElementById("login-section").style.display = "none";
-    document.getElementById("admin-panel").style.display = "block";
-
+    showAdminPanel();
     loadDishes();
 }
 
-
-// LOGOUT
+/* ===============================
+   LOGOUT
+================================= */
 async function logoutAdmin() {
     await client.auth.signOut();
     location.reload();
 }
 
-
-// SESSION
+/* ===============================
+   SESSION
+================================= */
 async function checkSession() {
-    const { data } = await client.auth.getSession();
+    const { data, error } = await client.auth.getSession();
 
-    if (data.session) {
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("admin-panel").style.display = "block";
+    if (error) {
+        console.error("Erreur session :", error.message);
+        return;
+    }
+
+    if (data?.session) {
+        showAdminPanel();
         loadDishes();
     }
 }
 
+function showAdminPanel() {
+    const adminPanel = document.getElementById("admin-panel");
+    const loginSection = document.getElementById("login-section");
+    const loginMessage = document.getElementById("login-message");
+
+    if (loginSection) loginSection.style.display = "none";
+    if (adminPanel) adminPanel.style.display = "block";
+    if (loginMessage) loginMessage.innerText = "";
+}
 
 /* ===============================
    OUTILS IMAGES
 ================================= */
-
-// Upload dans le bucket + retour du chemin fichier
 async function uploadImage(file) {
-    const fileExt = file.name.split(".").pop().toLowerCase();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+    if (!file) return null;
+
+    const fileExt = file.name.split(".").pop()?.toLowerCase() || "png";
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${fileExt}`;
 
     const { error } = await client.storage
         .from(BUCKET_NAME)
@@ -75,10 +129,9 @@ async function uploadImage(file) {
         return null;
     }
 
-    return fileName; // on retourne le path, pas l'URL publique
+    return fileName;
 }
 
-// Construit l'URL publique à partir du path
 function getImagePublicUrl(imagePath) {
     if (!imagePath) return "";
 
@@ -89,11 +142,13 @@ function getImagePublicUrl(imagePath) {
     return data?.publicUrl || "";
 }
 
-
 /* ===============================
    CHARGER LES PLATS
 ================================= */
 async function loadDishes() {
+    const container = document.getElementById("dish-list");
+    if (!container) return;
+
     const { data, error } = await client
         .from("dishes")
         .select("*")
@@ -102,73 +157,93 @@ async function loadDishes() {
         .order("name", { ascending: true });
 
     if (error) {
-        console.error(error);
+        console.error("Erreur chargement plats :", error.message);
+        container.innerHTML = "<p>Erreur lors du chargement des plats.</p>";
         return;
     }
 
-    const container = document.getElementById("dish-list");
     container.innerHTML = "";
 
-    const activeDishes = data.filter(d => d.available);
-    const inactiveDishes = data.filter(d => !d.available);
+    const activeDishes = data.filter(dish => dish.available);
+    const inactiveDishes = data.filter(dish => !dish.available);
 
-    renderDishGroup(activeDishes, container);
+    if (activeDishes.length > 0) {
+        const activeTitle = document.createElement("h2");
+        activeTitle.textContent = "Plats actifs";
+        activeTitle.className = "admin-group-title";
+        container.appendChild(activeTitle);
+
+        renderDishGroup(activeDishes, container, false);
+    }
 
     if (inactiveDishes.length > 0) {
         const separator = document.createElement("hr");
         separator.className = "admin-separator";
-        separator.style.margin = "50px 0";
+        separator.style.margin = "40px 0";
         container.appendChild(separator);
+
+        const inactiveTitle = document.createElement("h2");
+        inactiveTitle.textContent = "Plats désactivés";
+        inactiveTitle.className = "admin-group-title";
+        container.appendChild(inactiveTitle);
 
         renderDishGroup(inactiveDishes, container, true);
     }
-}
 
+    if (data.length === 0) {
+        container.innerHTML = "<p>Aucun plat enregistré.</p>";
+    }
+}
 
 /* ===============================
    RENDU DES GROUPES
 ================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
     let currentCategory = null;
+    let categoryBlock = null;
     let grid = null;
 
     dishes.forEach(dish => {
         if (dish.category !== currentCategory) {
             currentCategory = dish.category;
 
+            categoryBlock = document.createElement("section");
+            categoryBlock.className = "admin-category-block";
+
+            const title = document.createElement("h3");
+            title.className = "admin-category-title";
+            title.textContent = formatCategoryName(currentCategory);
+
             grid = document.createElement("div");
             grid.className = "dish-grid";
-            container.appendChild(grid);
+
+            categoryBlock.appendChild(title);
+            categoryBlock.appendChild(grid);
+            container.appendChild(categoryBlock);
         }
 
         const card = document.createElement("div");
         card.className = "dish-card";
-
         if (isInactive) {
             card.classList.add("dish-disabled");
         }
 
-        const info = document.createElement("div");
-        info.className = "dish-info";
-        info.innerHTML = `
-            <b>${dish.name}</b><br>
-            ${dish.price}€
-        `;
-
         const imageDiv = document.createElement("div");
         imageDiv.className = "dish-image";
+        imageDiv.style.position = "relative";
 
         if (dish.image_path) {
             const img = document.createElement("img");
             img.src = getImagePublicUrl(dish.image_path);
             img.alt = dish.name || "Image du plat";
-            img.style.width = "100%";
-            img.style.borderRadius = "10px";
             img.loading = "lazy";
+            img.style.width = "100%";
+            img.style.display = "block";
+            img.style.borderRadius = "10px";
 
             img.onerror = () => {
                 console.error("Image introuvable :", dish.image_path);
-                img.style.display = "none";
+                img.remove();
             };
 
             imageDiv.appendChild(img);
@@ -177,30 +252,55 @@ function renderDishGroup(dishes, container, isInactive = false) {
         const actions = document.createElement("div");
         actions.className = "dish-actions";
         actions.style.opacity = "0";
+        actions.style.pointerEvents = "none";
 
-        actions.innerHTML = `
-            <button onclick="toggleDish('${dish.id}', ${dish.available})">
-                ${dish.available ? "Désactiver" : "Activer"}
-            </button>
+        const toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.textContent = dish.available ? "Désactiver" : "Activer";
+        toggleBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            toggleDish(dish.id, dish.available);
+        });
 
-            <button onclick="editDish('${dish.id}')">
-                Modifier
-            </button>
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.textContent = "Modifier";
+        editBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            editDish(dish.id);
+        });
 
-            <button onclick="deleteDish('${dish.id}')">
-                Supprimer
-            </button>
-        `;
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.textContent = "Supprimer";
+        deleteBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            deleteDish(dish.id);
+        });
+
+        actions.appendChild(toggleBtn);
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
 
         imageDiv.appendChild(actions);
 
         imageDiv.addEventListener("mouseenter", () => {
             actions.style.opacity = "1";
+            actions.style.pointerEvents = "auto";
         });
 
         imageDiv.addEventListener("mouseleave", () => {
             actions.style.opacity = "0";
+            actions.style.pointerEvents = "none";
         });
+
+        const info = document.createElement("div");
+        info.className = "dish-info";
+        info.innerHTML = `
+            <b>${escapeHtml(dish.name || "")}</b><br>
+            ${dish.price ?? 0} €
+            ${dish.subcategory ? `<br><small>${escapeHtml(dish.subcategory)}</small>` : ""}
+        `;
 
         card.appendChild(imageDiv);
         card.appendChild(info);
@@ -208,19 +308,22 @@ function renderDishGroup(dishes, container, isInactive = false) {
     });
 }
 
-
 /* ===============================
-   ACTIVER / DESACTIVER
+   ACTIVER / DÉSACTIVER
 ================================= */
 async function toggleDish(id, status) {
-    await client
+    const { error } = await client
         .from("dishes")
         .update({ available: !status })
         .eq("id", id);
 
+    if (error) {
+        alert("Erreur mise à jour : " + error.message);
+        return;
+    }
+
     loadDishes();
 }
-
 
 /* ===============================
    SUPPRIMER PLAT + IMAGE
@@ -260,12 +363,10 @@ async function deleteDish(id) {
         }
 
         loadDishes();
-
     } catch (err) {
         alert("Erreur : " + err.message);
     }
 }
-
 
 /* ===============================
    EDIT
@@ -274,40 +375,45 @@ function editDish(id) {
     console.log("Modifier plat :", id);
 }
 
-
 /* ===============================
    TAP MOBILE
 ================================= */
 document.addEventListener("click", function (e) {
-    const card = e.target.closest(".dish-card");
+    const clickedCard = e.target.closest(".dish-card");
 
-    document.querySelectorAll(".dish-actions").forEach(el => {
-        el.style.opacity = "0";
+    document.querySelectorAll(".dish-actions").forEach(actions => {
+        actions.style.opacity = "0";
+        actions.style.pointerEvents = "none";
     });
 
-    if (card) {
-        const actions = card.querySelector(".dish-actions");
+    if (clickedCard) {
+        const actions = clickedCard.querySelector(".dish-actions");
         if (actions) {
             actions.style.opacity = "1";
+            actions.style.pointerEvents = "auto";
         }
     }
 });
 
-
 /* ===============================
    AJOUT PLAT
 ================================= */
-document.getElementById("dish-form").addEventListener("submit", async (e) => {
+async function handleDishSubmit(e) {
     e.preventDefault();
 
-    const name = document.getElementById("name").value.trim();
-    const category = document.getElementById("category").value;
-    const subcategory = document.getElementById("subcategory").value.trim();
-    const price = parseFloat(document.getElementById("price").value);
-    const description = document.getElementById("description").value.trim();
-    const ingredients = document.getElementById("ingredients").value.trim();
-    const available = document.getElementById("available").checked;
-    const file = document.getElementById("image_file").files[0];
+    const name = document.getElementById("name")?.value.trim() || "";
+    const category = document.getElementById("category")?.value || "";
+    const subcategory = document.getElementById("subcategory")?.value.trim() || "";
+    const price = parseFloat(document.getElementById("price")?.value || "0");
+    const description = document.getElementById("description")?.value.trim() || "";
+    const ingredients = document.getElementById("ingredients")?.value.trim() || "";
+    const available = document.getElementById("available")?.checked || false;
+    const file = document.getElementById("image_file")?.files?.[0] || null;
+
+    if (!name || !category || isNaN(price)) {
+        alert("Merci de remplir correctement le nom, la catégorie et le prix.");
+        return;
+    }
 
     let image_path = null;
 
@@ -320,10 +426,10 @@ document.getElementById("dish-form").addEventListener("submit", async (e) => {
         {
             name,
             category,
-            subcategory,
+            subcategory: subcategory || null,
             price,
-            description,
-            ingredients,
+            description: description || null,
+            ingredients: ingredients || null,
             available,
             image_path
         }
@@ -334,6 +440,33 @@ document.getElementById("dish-form").addEventListener("submit", async (e) => {
         return;
     }
 
-    document.getElementById("dish-form").reset();
+    const form = document.getElementById("dish-form");
+    if (form) form.reset();
+
     loadDishes();
-});
+}
+
+/* ===============================
+   OUTILS
+================================= */
+function formatCategoryName(category) {
+    if (!category) return "Sans catégorie";
+
+    const map = {
+        entree: "Entrées",
+        plat: "Plats",
+        dessert: "Desserts",
+        boisson: "Boissons"
+    };
+
+    return map[category] || category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+function escapeHtml(str) {
+    return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
