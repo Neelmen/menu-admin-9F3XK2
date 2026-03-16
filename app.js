@@ -4,6 +4,7 @@ const SUPABASE_KEY = "sb_publishable_W0bTuLBKIo_-tSVK_XfKYg_LScZ_5EY";
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const BUCKET_NAME = "dishes-images";
 
+
 /* ===============================
    INITIALISATION
 ================================= */
@@ -15,32 +16,23 @@ document.addEventListener("DOMContentLoaded", () => {
     if (adminPanel) adminPanel.style.display = "none";
     if (loginSection) loginSection.style.display = "block";
 
-    checkSession();
-
     if (dishForm) {
         dishForm.addEventListener("submit", handleDishSubmit);
     }
+
+    checkSession();
 });
+
 
 /* ===============================
    LOGIN ADMIN
 ================================= */
 async function loginAdmin() {
-    const emailInput = document.getElementById("admin-email");
-    const passwordInput = document.getElementById("admin-password");
+    const email = document.getElementById("admin-email")?.value?.trim();
+    const password = document.getElementById("admin-password")?.value;
+
     const loginMessage = document.getElementById("login-message");
-
-    const email = emailInput?.value?.trim() || "";
-    const password = passwordInput?.value || "";
-
     if (loginMessage) loginMessage.innerText = "";
-
-    if (!email || !password) {
-        if (loginMessage) {
-            loginMessage.innerText = "Veuillez renseigner votre identifiant et votre mot de passe.";
-        }
-        return;
-    }
 
     const { error } = await client.auth.signInWithPassword({
         email,
@@ -48,30 +40,21 @@ async function loginAdmin() {
     });
 
     if (error) {
-        let message = "Identifiant ou mot de passe non reconnu.";
-
-        const errorText = (error.message || "").toLowerCase();
-
-        if (
-            errorText.includes("invalid login credentials") ||
-            errorText.includes("invalid credentials")
-        ) {
-            message = "Identifiant ou mot de passe non reconnu.";
-        } else if (errorText.includes("email not confirmed")) {
-            message = "Adresse e-mail non confirmée.";
-        } else if (errorText.includes("too many requests")) {
-            message = "Trop de tentatives de connexion. Réessayez dans quelques instants.";
-        } else if (errorText.includes("network")) {
-            message = "Problème de connexion réseau. Vérifiez votre connexion internet.";
+        if (loginMessage) {
+            loginMessage.innerText = "Erreur : " + error.message;
         }
-
-        if (loginMessage) loginMessage.innerText = message;
         return;
     }
 
-    showAdminPanel();
+    const loginSection = document.getElementById("login-section");
+    const adminPanel = document.getElementById("admin-panel");
+
+    if (loginSection) loginSection.style.display = "none";
+    if (adminPanel) adminPanel.style.display = "block";
+
     loadDishes();
 }
+
 
 /* ===============================
    LOGOUT
@@ -81,41 +64,32 @@ async function logoutAdmin() {
     location.reload();
 }
 
+
 /* ===============================
    SESSION
 ================================= */
 async function checkSession() {
-    const { data, error } = await client.auth.getSession();
+    const { data } = await client.auth.getSession();
 
-    if (error) {
-        console.error("Erreur session :", error.message);
-        return;
-    }
+    const loginSection = document.getElementById("login-section");
+    const adminPanel = document.getElementById("admin-panel");
 
     if (data?.session) {
-        showAdminPanel();
+        if (loginSection) loginSection.style.display = "none";
+        if (adminPanel) adminPanel.style.display = "block";
         loadDishes();
     }
 }
 
-function showAdminPanel() {
-    const adminPanel = document.getElementById("admin-panel");
-    const loginSection = document.getElementById("login-section");
-    const loginMessage = document.getElementById("login-message");
-
-    if (loginSection) loginSection.style.display = "none";
-    if (adminPanel) adminPanel.style.display = "block";
-    if (loginMessage) loginMessage.innerText = "";
-}
 
 /* ===============================
    OUTILS IMAGES
 ================================= */
-async function uploadImage(file) {
-    if (!file) return null;
 
-    const fileExt = file.name.split(".").pop()?.toLowerCase() || "png";
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${fileExt}`;
+// Upload dans le bucket + retour du path fichier
+async function uploadImage(file) {
+    const fileExt = (file.name.split(".").pop() || "png").toLowerCase();
+    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
     const { error } = await client.storage
         .from(BUCKET_NAME)
@@ -132,175 +106,174 @@ async function uploadImage(file) {
     return fileName;
 }
 
+// Construit l'URL publique à partir du path
 function getImagePublicUrl(imagePath) {
     if (!imagePath) return "";
 
+    const cleanPath = extractStoragePath(imagePath);
+    if (!cleanPath) return "";
+
     const { data } = client.storage
         .from(BUCKET_NAME)
-        .getPublicUrl(imagePath);
+        .getPublicUrl(cleanPath);
 
     return data?.publicUrl || "";
 }
+
+// Convertit n'importe quelle valeur stockée en vrai path Storage
+function extractStoragePath(value) {
+    if (!value || typeof value !== "string") return null;
+
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+
+    // Cas 1 : URL publique complète
+    const publicPrefix = `/storage/v1/object/public/${BUCKET_NAME}/`;
+    const publicIndex = trimmed.indexOf(publicPrefix);
+    if (publicIndex !== -1) {
+        return trimmed.substring(publicIndex + publicPrefix.length).split("?")[0];
+    }
+
+    // Cas 2 : on a juste le nom du fichier
+    // ex: 1773636921933.png
+    if (!trimmed.includes("http://") && !trimmed.includes("https://") && !trimmed.includes("/")) {
+        return trimmed;
+    }
+
+    // Cas 3 : chemin relatif avec dossiers éventuels
+    const bucketSegment = `${BUCKET_NAME}/`;
+    const bucketIndex = trimmed.indexOf(bucketSegment);
+    if (bucketIndex !== -1) {
+        return trimmed.substring(bucketIndex + bucketSegment.length).split("?")[0];
+    }
+
+    // Cas 4 : URL quelconque -> on garde le dernier segment
+    try {
+        const url = new URL(trimmed);
+        const parts = url.pathname.split("/").filter(Boolean);
+        return parts[parts.length - 1] || null;
+    } catch {
+        return trimmed.split("/").pop()?.split("?")[0] || null;
+    }
+}
+
 
 /* ===============================
    CHARGER LES PLATS
 ================================= */
 async function loadDishes() {
-    const container = document.getElementById("dish-list");
-    if (!container) return;
-
     const { data, error } = await client
         .from("dishes")
         .select("*")
         .order("category", { ascending: true })
-        .order("subcategory", { ascending: true })
         .order("name", { ascending: true });
 
     if (error) {
-        console.error("Erreur chargement plats :", error.message);
-        container.innerHTML = "<p>Erreur lors du chargement des plats.</p>";
+        console.error("Erreur chargement plats :", error);
         return;
     }
 
+    const container = document.getElementById("dish-list");
+    if (!container) return;
+
     container.innerHTML = "";
 
-    const activeDishes = data.filter(dish => dish.available);
-    const inactiveDishes = data.filter(dish => !dish.available);
+    const activeDishes = (data || []).filter(d => d.available);
+    const inactiveDishes = (data || []).filter(d => !d.available);
 
-    if (activeDishes.length > 0) {
-        const activeTitle = document.createElement("h2");
-        activeTitle.textContent = "Plats actifs";
-        activeTitle.className = "admin-group-title";
-        container.appendChild(activeTitle);
-
-        renderDishGroup(activeDishes, container, false);
-    }
+    renderDishGroup(activeDishes, container);
 
     if (inactiveDishes.length > 0) {
         const separator = document.createElement("hr");
         separator.className = "admin-separator";
-        separator.style.margin = "40px 0";
+        separator.style.margin = "50px 0";
         container.appendChild(separator);
-
-        const inactiveTitle = document.createElement("h2");
-        inactiveTitle.textContent = "Plats désactivés";
-        inactiveTitle.className = "admin-group-title";
-        container.appendChild(inactiveTitle);
 
         renderDishGroup(inactiveDishes, container, true);
     }
-
-    if (data.length === 0) {
-        container.innerHTML = "<p>Aucun plat enregistré.</p>";
-    }
 }
+
 
 /* ===============================
    RENDU DES GROUPES
 ================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
     let currentCategory = null;
-    let categoryBlock = null;
     let grid = null;
 
     dishes.forEach(dish => {
         if (dish.category !== currentCategory) {
             currentCategory = dish.category;
 
-            categoryBlock = document.createElement("section");
-            categoryBlock.className = "admin-category-block";
-
-            const title = document.createElement("h3");
-            title.className = "admin-category-title";
-            title.textContent = formatCategoryName(currentCategory);
-
             grid = document.createElement("div");
             grid.className = "dish-grid";
-
-            categoryBlock.appendChild(title);
-            categoryBlock.appendChild(grid);
-            container.appendChild(categoryBlock);
+            container.appendChild(grid);
         }
 
         const card = document.createElement("div");
         card.className = "dish-card";
+
         if (isInactive) {
             card.classList.add("dish-disabled");
         }
 
         const imageDiv = document.createElement("div");
         imageDiv.className = "dish-image";
-        imageDiv.style.position = "relative";
 
-        if (dish.image_path) {
+        const imageSource =
+            dish.image_path ||
+            dish.url ||
+            dish.name ||
+            "";
+
+        if (imageSource) {
             const img = document.createElement("img");
-            img.src = getImagePublicUrl(dish.image_path);
+            img.src = getImagePublicUrl(imageSource);
             img.alt = dish.name || "Image du plat";
-            img.loading = "lazy";
             img.style.width = "100%";
-            img.style.display = "block";
             img.style.borderRadius = "10px";
+            img.loading = "lazy";
 
             img.onerror = () => {
-                console.error("Image introuvable :", dish.image_path);
-                img.remove();
+                console.error("Image introuvable :", imageSource);
+                img.style.display = "none";
             };
 
             imageDiv.appendChild(img);
         }
 
+        const info = document.createElement("div");
+        info.className = "dish-info";
+        info.innerHTML = `
+            <b>${escapeHtml(dish.name || "")}</b><br>
+            ${formatPrice(dish.price)}
+        `;
+
         const actions = document.createElement("div");
         actions.className = "dish-actions";
         actions.style.opacity = "0";
-        actions.style.pointerEvents = "none";
 
-        const toggleBtn = document.createElement("button");
-        toggleBtn.type = "button";
-        toggleBtn.textContent = dish.available ? "Désactiver" : "Activer";
-        toggleBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            toggleDish(dish.id, dish.available);
-        });
-
-        const editBtn = document.createElement("button");
-        editBtn.type = "button";
-        editBtn.textContent = "Modifier";
-        editBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            editDish(dish.id);
-        });
-
-        const deleteBtn = document.createElement("button");
-        deleteBtn.type = "button";
-        deleteBtn.textContent = "Supprimer";
-        deleteBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            deleteDish(dish.id);
-        });
-
-        actions.appendChild(toggleBtn);
-        actions.appendChild(editBtn);
-        actions.appendChild(deleteBtn);
+        actions.innerHTML = `
+            <button type="button" onclick="toggleDish('${dish.id}', ${dish.available})">
+                ${dish.available ? "Désactiver" : "Activer"}
+            </button>
+            <button type="button" onclick="editDish('${dish.id}')">
+                Modifier
+            </button>
+            <button type="button" onclick="deleteDish('${dish.id}')">
+                Supprimer
+            </button>
+        `;
 
         imageDiv.appendChild(actions);
 
         imageDiv.addEventListener("mouseenter", () => {
             actions.style.opacity = "1";
-            actions.style.pointerEvents = "auto";
         });
 
         imageDiv.addEventListener("mouseleave", () => {
             actions.style.opacity = "0";
-            actions.style.pointerEvents = "none";
         });
-
-        const info = document.createElement("div");
-        info.className = "dish-info";
-        info.innerHTML = `
-            <b>${escapeHtml(dish.name || "")}</b><br>
-            ${dish.price ?? 0} €
-            ${dish.subcategory ? `<br><small>${escapeHtml(dish.subcategory)}</small>` : ""}
-        `;
 
         card.appendChild(imageDiv);
         card.appendChild(info);
@@ -308,8 +281,9 @@ function renderDishGroup(dishes, container, isInactive = false) {
     });
 }
 
+
 /* ===============================
-   ACTIVER / DÉSACTIVER
+   ACTIVER / DESACTIVER
 ================================= */
 async function toggleDish(id, status) {
     const { error } = await client
@@ -325,31 +299,49 @@ async function toggleDish(id, status) {
     loadDishes();
 }
 
+
 /* ===============================
-   SUPPRIMER PLAT + IMAGE
+   SUPPRIMER PLAT + IMAGE STORAGE
 ================================= */
 async function deleteDish(id) {
     const confirmDelete = confirm("Supprimer ce plat et son image ?");
     if (!confirmDelete) return;
 
     try {
+        // On récupère plusieurs champs possibles pour être compatible
         const { data: dishData, error: fetchError } = await client
             .from("dishes")
-            .select("image_path")
+            .select("id, image_path, name, url")
             .eq("id", id)
             .single();
 
-        if (fetchError) {
-            throw fetchError;
-        }
+        if (fetchError) throw fetchError;
 
-        if (dishData?.image_path) {
-            const { error: removeError } = await client.storage
+        // IMPORTANT :
+        // On essaye d'abord image_path
+        // puis url
+        // et en dernier recours name si ça ressemble à un nom de fichier image
+        const candidates = [
+            dishData?.image_path,
+            dishData?.url,
+            isLikelyImageFile(dishData?.name) ? dishData?.name : null
+        ].filter(Boolean);
+
+        const uniquePaths = [...new Set(
+            candidates
+                .map(extractStoragePath)
+                .filter(Boolean)
+        )];
+
+        if (uniquePaths.length > 0) {
+            const { data: removeData, error: removeError } = await client.storage
                 .from(BUCKET_NAME)
-                .remove([dishData.image_path]);
+                .remove(uniquePaths);
 
             if (removeError) {
-                console.error("Erreur suppression image :", removeError.message);
+                console.error("Erreur suppression image storage :", removeError);
+            } else {
+                console.log("Images supprimées du storage :", removeData);
             }
         }
 
@@ -358,15 +350,16 @@ async function deleteDish(id) {
             .delete()
             .eq("id", id);
 
-        if (deleteError) {
-            throw deleteError;
-        }
+        if (deleteError) throw deleteError;
 
         loadDishes();
+
     } catch (err) {
+        console.error(err);
         alert("Erreur : " + err.message);
     }
 }
+
 
 /* ===============================
    EDIT
@@ -375,25 +368,28 @@ function editDish(id) {
     console.log("Modifier plat :", id);
 }
 
+
 /* ===============================
    TAP MOBILE
 ================================= */
 document.addEventListener("click", function (e) {
-    const clickedCard = e.target.closest(".dish-card");
+    const card = e.target.closest(".dish-card");
+    const clickedAction = e.target.closest(".dish-actions");
 
-    document.querySelectorAll(".dish-actions").forEach(actions => {
-        actions.style.opacity = "0";
-        actions.style.pointerEvents = "none";
-    });
+    if (!clickedAction) {
+        document.querySelectorAll(".dish-actions").forEach(el => {
+            el.style.opacity = "0";
+        });
+    }
 
-    if (clickedCard) {
-        const actions = clickedCard.querySelector(".dish-actions");
+    if (card) {
+        const actions = card.querySelector(".dish-actions");
         if (actions) {
             actions.style.opacity = "1";
-            actions.style.pointerEvents = "auto";
         }
     }
 });
+
 
 /* ===============================
    AJOUT PLAT
@@ -401,19 +397,14 @@ document.addEventListener("click", function (e) {
 async function handleDishSubmit(e) {
     e.preventDefault();
 
-    const name = document.getElementById("name")?.value.trim() || "";
+    const name = document.getElementById("name")?.value?.trim() || "";
     const category = document.getElementById("category")?.value || "";
-    const subcategory = document.getElementById("subcategory")?.value.trim() || "";
+    const subcategory = document.getElementById("subcategory")?.value?.trim() || "";
     const price = parseFloat(document.getElementById("price")?.value || "0");
-    const description = document.getElementById("description")?.value.trim() || "";
-    const ingredients = document.getElementById("ingredients")?.value.trim() || "";
+    const description = document.getElementById("description")?.value?.trim() || "";
+    const ingredients = document.getElementById("ingredients")?.value?.trim() || "";
     const available = document.getElementById("available")?.checked || false;
-    const file = document.getElementById("image_file")?.files?.[0] || null;
-
-    if (!name || !category || isNaN(price)) {
-        alert("Merci de remplir correctement le nom, la catégorie et le prix.");
-        return;
-    }
+    const file = document.getElementById("image_file")?.files?.[0];
 
     let image_path = null;
 
@@ -426,10 +417,10 @@ async function handleDishSubmit(e) {
         {
             name,
             category,
-            subcategory: subcategory || null,
+            subcategory, // conservé en base si tu veux l'utiliser plus tard
             price,
-            description: description || null,
-            ingredients: ingredients || null,
+            description,
+            ingredients,
             available,
             image_path
         }
@@ -446,24 +437,23 @@ async function handleDishSubmit(e) {
     loadDishes();
 }
 
+
 /* ===============================
-   OUTILS
+   HELPERS
 ================================= */
-function formatCategoryName(category) {
-    if (!category) return "Sans catégorie";
+function isLikelyImageFile(value) {
+    if (!value || typeof value !== "string") return false;
+    return /\.(jpg|jpeg|png|webp|gif|avif|svg)$/i.test(value.trim());
+}
 
-    const map = {
-        entree: "Entrées",
-        plat: "Plats",
-        dessert: "Desserts",
-        boisson: "Boissons"
-    };
-
-    return map[category] || category.charAt(0).toUpperCase() + category.slice(1);
+function formatPrice(price) {
+    const num = Number(price);
+    if (Number.isNaN(num)) return "";
+    return `${num.toFixed(2)}€`;
 }
 
 function escapeHtml(str) {
-    return str
+    return String(str)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
