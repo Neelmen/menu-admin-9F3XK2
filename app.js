@@ -9,6 +9,9 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ================================
 // LOGIN ADMIN
 // ================================
+// ================================
+// LOGIN ADMIN
+// ================================
 async function loginAdmin() {
     const email = document.getElementById("admin-email").value;
     const password = document.getElementById("admin-password").value;
@@ -16,7 +19,17 @@ async function loginAdmin() {
     const { data, error } = await client.auth.signInWithPassword({ email, password });
 
     if (error) {
-        document.getElementById("login-message").innerText = "Erreur : " + error.message;
+        let message = "Erreur : Identifiant ou mot de passe incorrect";
+
+        // Tu peux raffiner selon le code d'erreur si besoin
+        if (error.message.includes("invalid login credentials")) {
+            message = "Identifiant ou mot de passe non reconnu";
+        } else if (error.message.includes("user not found")) {
+            message = "Compte introuvable";
+        }
+
+        document.getElementById("login-message").innerText = message;
+
     } else {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("admin-panel").style.display = "block";
