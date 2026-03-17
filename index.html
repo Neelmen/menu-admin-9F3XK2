@@ -1,113 +1,33 @@
-<!DOCTYPE html>
-<html lang="fr">
+<form id="dish-form">
 
-<head>
+    <input type="text" id="name" name="name" placeholder="Nom du plat" required>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <title>Admin Menu</title>
+    <select id="category" name="category">
+        <option value="entree">Entrée</option>
+        <option value="plat">Plat</option>
+        <option value="dessert">Dessert</option>
+        <option value="boisson">Boisson</option>
+    </select>
 
-    <link rel="stylesheet" href="style.css">
+    <input type="text" id="subcategory" name="subcategory" placeholder="Sous catégorie">
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <label class="file-upload">
+        Choisir une image
+        <input type="file" id="image_file" name="image_file">
+    </label>
 
-</head>
+    <input type="number" id="price" name="price" placeholder="Prix" step="0.01" required>
 
-<body>
+    <textarea id="description" name="description" placeholder="Description"></textarea>
 
-    <h1>Administration Menu</h1>
+    <textarea id="ingredients" name="ingredients" placeholder="Ingrédients"></textarea>
 
-    <!-- LOGIN ADMIN -->
+    Disponible
+    <label class="switch">
+        <input type="checkbox" id="available" name="available" checked>
+        <span class="slider"></span>
+    </label>
 
-    <div id="login-section">
+    <button type="submit">Ajouter</button>
 
-        <h2>Connexion Admin</h2>
-
-        <input type="email" id="admin-email" placeholder="Email" required>
-
-        <input type="password" id="admin-password" placeholder="Mot de passe" required>
-
-        <button type="button" onclick="loginAdmin()">Se connecter</button>
-
-        <p id="login-message"></p>
-
-    </div>
-
-    <!-- PANEL ADMIN -->
-
-    <div id="admin-panel" style="display:none;">
-
-        <button type="button" onclick="logoutAdmin()">Se déconnecter</button>
-
-        <hr class="admin-separator">
-
-        <h2>Ajouter un plat</h2>
-
-        <form id="dish-form">
-
-            <input type="text" id="name" placeholder="Nom du plat" required>
-
-            <select id="category">
-                <option value="entree">Entrée</option>
-                <option value="plat">Plat</option>
-                <option value="dessert">Dessert</option>
-                <option value="boisson">Boisson</option>
-            </select>
-
-            <input type="text" id="subcategory" placeholder="Sous catégorie">
-
-            <label class="file-upload">
-                Choisir une image
-                <input type="file" id="image_file">
-            </label>
-
-            <input type="number" id="price" placeholder="Prix" step="0.01" required>
-
-<textarea id="description" placeholder="Description"></textarea>
-
-<textarea id="ingredients" placeholder="Ingrédients"></textarea>
-
-            Disponible
-            <label class="switch">
-                <input type="checkbox" id="available" checked>
-                <span class="slider"></span>
-            </label>
-
-            <button type="submit">Ajouter</button>
-
-        </form>
-
-        <div id="image-preview"></div>
-
-        <h2>Liste des plats</h2>
-
-        <div id="dish-list"></div>
-
-    </div>
-
-    <!-- JS COMPLET -->
-    <script src="app.js"></script>
-
-    <!-- preview image -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const imageInput = document.getElementById("image_file");
-            const preview = document.getElementById("image-preview");
-
-            imageInput.addEventListener("change", () => {
-                const file = imageInput.files[0];
-
-                if (file) {
-                    const url = URL.createObjectURL(file);
-                    preview.innerHTML =
-                        `<img src="${url}" style="max-width:200px;border-radius:10px;margin-top:10px;">`;
-                } else {
-                    preview.innerHTML = "";
-                }
-            });
-        });
-    </script>
-
-</body>
-</html>
+</form>
