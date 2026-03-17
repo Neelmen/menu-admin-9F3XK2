@@ -308,43 +308,42 @@ async function deleteDish(id) {
     if (!confirmDelete) return;
 
     try {
-        // On récupère plusieurs champs possibles pour être compatible
+        // On récupère uniquement ce qui existe vraiment
         const { data: dishData, error: fetchError } = await client
             .from("dishes")
-            .select("id, image_path, name, url")
+            .select("id, image_path")
             .eq("id", id)
             .single();
 
         if (fetchError) throw fetchError;
 
-        // IMPORTANT :
-        // On essaye d'abord image_path
-        // puis url
-        // et en dernier recours name si ça ressemble à un nom de fichier image
-        const candidates = [
-            dishData?.image_path,
-            dishData?.url,
-            isLikelyImageFile(dishData?.name) ? dishData?.name : null
-        ].filter(Boolean);
+        // ===============================
+        // SUPPRESSION IMAGE STORAGE
+        // ===============================
+        if (dishData?.image_path) {
+            let filePath = dishData.image_path.trim();
 
-        const uniquePaths = [...new Set(
-            candidates
-                .map(extractStoragePath)
-                .filter(Boolean)
-        )];
+            // Si jamais une URL complète traîne encore, on nettoie
+            if (filePath.includes("/")) {
+                filePath = filePath.split("/").pop();
+            }
 
-        if (uniquePaths.length > 0) {
-            const { data: removeData, error: removeError } = await client.storage
+            console.log("🗑️ Suppression image :", filePath);
+
+            const { data, error: removeError } = await client.storage
                 .from(BUCKET_NAME)
-                .remove(uniquePaths);
+                .remove([filePath]);
 
             if (removeError) {
-                console.error("Erreur suppression image storage :", removeError);
+                console.error("❌ Erreur suppression image :", removeError.message);
             } else {
-                console.log("Images supprimées du storage :", removeData);
+                console.log("✅ Image supprimée :", data);
             }
         }
 
+        // ===============================
+        // SUPPRESSION DU PLAT
+        // ===============================
         const { error: deleteError } = await client
             .from("dishes")
             .delete()
@@ -355,7 +354,7 @@ async function deleteDish(id) {
         loadDishes();
 
     } catch (err) {
-        console.error(err);
+        console.error("❌ Erreur complète :", err);
         alert("Erreur : " + err.message);
     }
 }
