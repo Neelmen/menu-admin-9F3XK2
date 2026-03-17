@@ -252,8 +252,11 @@ function renderDishGroup(dishes, container, isInactive = false) {
 /* ===============================
    ACTIVER / DESACTIVER via RPC
 ================================= */
-async function toggleDish(id) {
-    const { error } = await client.rpc("toggle_dish_availability", { dish_id: id });
+async function toggleDish(id, status) {
+    const { error } = await client
+        .from("dishes")
+        .update({ available: !status })
+        .eq("id", id);
 
     if (error) {
         alert("Erreur mise à jour : " + error.message);
