@@ -227,16 +227,16 @@ function renderDishGroup(dishes, container, isInactive = false) {
         actions.style.opacity = "0";
 
         actions.innerHTML = `
-            <button type="button" onclick="toggleDish('${dish.id}')">
-                ${dish.available ? "Désactiver" : "Activer"}
-            </button>
-            <button type="button" onclick="editDish('${dish.id}')">
-                Modifier
-            </button>
-            <button type="button" onclick="deleteDish('${dish.id}')">
-                Supprimer
-            </button>
-        `;
+    <button type="button" onclick="toggleDish('${dish.id}', ${dish.available})">
+        ${dish.available ? "Désactiver" : "Activer"}
+    </button>
+    <button type="button" onclick="editDish('${dish.id}')">
+        Modifier
+    </button>
+    <button type="button" onclick="deleteDish('${dish.id}')">
+        Supprimer
+    </button>
+`;
 
         imageDiv.appendChild(actions);
 
