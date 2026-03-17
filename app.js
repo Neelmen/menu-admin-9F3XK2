@@ -308,11 +308,126 @@ async function deleteDish(id) {
 }
 
 /* ===============================
-   EDIT
+   EDIT / MODIFICATION PLAT
 ================================= */
-function editDish(id) {
+
+async function editDish(id) {
     console.log("Modifier plat :", id);
+
+    // Récupérer le plat depuis Supabase
+    const { data, error } = await client
+        .from("dishes")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+    if (error) {
+        console.error("Erreur récupération plat :", error);
+        alert("Impossible de récupérer les infos du plat.");
+        return;
+    }
+
+    // Récupérer le formulaire existant
+    const form = document.getElementById("dish-form");
+    if (!form) return;
+
+    // Remplir le formulaire avec les données existantes
+    form.querySelector('input[name="name"]').value = data.name || "";
+    form.querySelector('textarea[name="description"]').value = data.description || "";
+    form.querySelector('input[name="price"]').value = data.price || "";
+    form.querySelector('input[name="category"]').value = data.category || "";
+    form.querySelector('input[name="subcategory"]').value = data.subcategory || "";
+    form.querySelector('input[name="ingredients"]').value = data.ingredients || "";
+    form.querySelector('input[name="available"]').checked = !!data.available;
+
+    // Stocker l'ID du plat pour la modification
+    form.dataset.editId = id;
+
+    // Changer le bouton du formulaire de "Ajouter un plat" -> "Modifier le plat"
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.innerText = "Modifier le plat";
+
+    // Afficher le formulaire si caché
+    form.style.display = "block";
+
+    // Faire un scroll vers le formulaire avec transition
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
+/* ===============================
+   GESTION SUBMIT FORMULAIRE (AJOUT OU MODIFICATION)
+================================= */
+document.getElementById("dish-form")?.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const form = e.target;
+
+    // Récupérer les valeurs
+    const name = form.querySelector('input[name="name"]').value.trim();
+    const description = form.querySelector('textarea[name="description"]').value.trim();
+    const price = parseFloat(form.querySelector('input[name="price"]').value || "0");
+    const category = form.querySelector('input[name="category"]').value || "";
+    const subcategory = form.querySelector('input[name="subcategory"]').value || "";
+    const ingredients = form.querySelector('input[name="ingredients"]').value.trim() || "";
+    const available = form.querySelector('input[name="available"]').checked || false;
+    const file = form.querySelector('input[name="image_file"]')?.files?.[0];
+
+    let image_path = null;
+    if (file) {
+        image_path = await uploadImage(file);
+        if (!image_path) return;
+    }
+
+    const editId = form.dataset.editId;
+
+    if (editId) {
+        // -----------------
+        // MODIFICATION
+        // -----------------
+        const updateData = { name, description, price, category, subcategory, ingredients, available };
+        if (image_path) updateData.image_path = image_path;
+
+        const { data, error } = await client
+            .from("dishes")
+            .update(updateData)
+            .eq("id", editId);
+
+        if (error) {
+            alert("Erreur modification plat : " + error.message);
+            return;
+        } else {
+            console.log("Plat modifié :", data);
+        }
+
+        // Réinitialiser formulaire
+        form.reset();
+        delete form.dataset.editId;
+
+        // Remettre le bouton en "Ajouter un plat"
+        const submitButton = form.querySelector('button[type="submit"]');
+        if (submitButton) submitButton.innerText = "Ajouter un plat";
+
+    } else {
+        // -----------------
+        // AJOUT NOUVEAU PLAT
+        // -----------------
+        const { error } = await client.from("dishes").insert([{
+            name, description, price, category, subcategory, ingredients, available, image_path
+        }]);
+
+        if (error) {
+            alert("Erreur ajout plat : " + error.message);
+            return;
+        }
+
+        form.reset();
+    }
+
+    // Recharger la liste des plats
+    loadDishes();
+
+    // Scroll en haut pour voir le résultat
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
 
 /* ===============================
    TAP MOBILE
