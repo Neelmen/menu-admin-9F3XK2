@@ -131,9 +131,16 @@ function renderDishGroup(dishes, container, isInactive = false) {
     let currentCategory = null;
     let grid = null;
 
-    dishes.forEach(dish => {
-        // Crée un nouveau bloc pour chaque catégorie
+    dishes.forEach((dish, index) => {
+        // Si nouvelle catégorie, insère un séparateur sauf pour la première
         if (dish.category !== currentCategory) {
+            if (currentCategory !== null) {
+                const separator = document.createElement("hr");
+                separator.className = "admin-separator";
+                separator.style.margin = "50px 0";
+                container.appendChild(separator);
+            }
+
             currentCategory = dish.category;
             grid = document.createElement("div");
             grid.className = "category-group"; // CSS gère 2 colonnes
@@ -162,7 +169,7 @@ function renderDishGroup(dishes, container, isInactive = false) {
           ${formatPrice(dish.price)}<br>
           ${dish.description ? `<b>Description :</b> ${escapeHtml(dish.description)}<br>` : ""}
           ${dish.ingredients ? `<b>Ingrédients :</b> ${escapeHtml(dish.ingredients)}` : ""}
-         `;
+        `;
 
         const actions = document.createElement("div");
         actions.className = "dish-actions";
