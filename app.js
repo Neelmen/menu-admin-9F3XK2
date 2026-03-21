@@ -158,9 +158,9 @@ function renderDishGroup(dishes, container, isInactive = false) {
         const info = document.createElement("div");
         info.className = "dish-info";
         info.innerHTML = `
-       <b>${escapeHtml(dish.name)}</b><br>
-       ${formatPrice(dish.price)}<br>
-       ${escapeHtml(dish.description || "")}
+             <b>${escapeHtml(dish.name)}</b><br>
+             ${formatPrice(dish.price)}<br>
+             ${escapeHtml(dish.description || "")}
          `;
 
         const actions = document.createElement("div");
