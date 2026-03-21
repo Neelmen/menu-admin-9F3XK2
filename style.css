@@ -234,3 +234,10 @@ button, input, select, textarea {
     color: inherit !important;
     font-family: inherit;
 }
+.description {
+    margin-top: 5px;
+}
+
+.ingredients {
+    margin-top: 10px;
+}
