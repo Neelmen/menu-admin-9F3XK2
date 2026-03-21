@@ -117,17 +117,16 @@ h1 {
 /* Groupe de catégorie - grille 2 colonnes fixe */
 .category-group {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes fixes */
     gap: 20px;
-    justify-items: center;
+    width: 100%;       /* prend toute la largeur du container */
 }
 
 /* Card */
 .dish-card {
     background: white;
     border-radius: 15px;
-    width: 100%; /* occupe toute la cellule */
-    max-width: 250px;
+    width: 100%;       /* occupe toute la cellule de la grille */
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     display: flex;
