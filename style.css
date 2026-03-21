@@ -106,7 +106,7 @@ h1 {
 }
 
 /* ===============================
-   LISTE PLATS
+   LISTE PLATS - ADMIN
 ================================= */
 #dish-list {
     display: flex;
@@ -114,19 +114,20 @@ h1 {
     gap: 40px; /* espace entre catégories */
 }
 
-/* Chaque catégorie */
+/* Groupe de catégorie - grille 2 colonnes fixe */
 .category-group {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes */
     gap: 20px;
+    justify-items: center;
 }
 
 /* Card */
 .dish-card {
     background: white;
     border-radius: 15px;
-    width: 250px;
+    width: 100%; /* occupe toute la cellule */
+    max-width: 250px;
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     display: flex;
@@ -190,6 +191,8 @@ h1 {
     text-align: left;
     color: #333;
 }
+
+/* Supprime tout responsive pour les colonnes - toujours 2 colonnes */
 
 /* responsive */
 @media(max-width:600px) {
