@@ -130,18 +130,14 @@ async function loadDishes() {
 // =====================================
 function renderDishGroup(dishes, container, isInactive = false) {
     let currentCategory = null;
-    let currentSub = null;
     let grid = null;
 
     dishes.forEach(dish => {
-        // Nouveau bloc si changement de catégorie ou subcategory
-        if (dish.category !== currentCategory || dish.subcategory !== currentSub) {
+        // Nouveau bloc si changement de catégorie
+        if (dish.category !== currentCategory) {
             currentCategory = dish.category;
-            currentSub = dish.subcategory;
             grid = document.createElement("div");
-            grid.className = "dish-grid";
-            // Ajouter un petit margin-top si nouvelle subcategory
-            grid.style.marginTop = "20px";
+            grid.className = "category-group"; // grille 2 colonnes
             container.appendChild(grid);
         }
 
@@ -156,8 +152,6 @@ function renderDishGroup(dishes, container, isInactive = false) {
             const img = document.createElement("img");
             img.src = getImagePublicUrl(dish.image_path);
             img.alt = dish.name || "Image du plat";
-            img.style.width = "100%";
-            img.style.borderRadius = "10px";
             img.loading = "lazy";
             imageDiv.appendChild(img);
         }
@@ -182,7 +176,6 @@ function renderDishGroup(dishes, container, isInactive = false) {
         `;
 
         imageDiv.appendChild(actions);
-
         imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
         imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
 
