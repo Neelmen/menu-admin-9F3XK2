@@ -1,3 +1,6 @@
+/* ===============================
+   Styles généraux
+================================= */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -11,8 +14,9 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* LOGIN */
-
+/* ===============================
+   LOGIN
+================================= */
 #login-section {
     background: white;
     display: inline-block;
@@ -44,8 +48,9 @@ h1 {
     background: #e63946;
 }
 
-/* ADMIN PANEL */
-
+/* ===============================
+   ADMIN PANEL
+================================= */
 #admin-panel {
     max-width: 900px;
     margin: auto;
@@ -61,8 +66,9 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* FORM */
-
+/* ===============================
+   FORM
+================================= */
 #dish-form {
     background: white;
     padding: 25px;
@@ -99,26 +105,35 @@ h1 {
     background: #111;
 }
 
-/* LISTE PLATS */
-
+/* ===============================
+   LISTE PLATS
+================================= */
 #dish-list {
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* espace entre catégories */
+}
+
+/* Chaque catégorie */
+.category-group {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    gap: 20px;
 }
 
-/* CARD */
-
+/* Card */
 .dish-card {
     background: white;
     border-radius: 15px;
     width: 250px;
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
 }
 
 /* IMAGE */
-
 .dish-image {
     position: relative;
 }
@@ -130,7 +145,6 @@ h1 {
 }
 
 /* OVERLAY ACTIONS */
-
 .dish-actions {
     position: absolute;
     top: 0;
@@ -147,13 +161,9 @@ h1 {
     transition: opacity 0.3s;
 }
 
-/* hover desktop */
-
 .dish-image:hover .dish-actions {
     opacity: 1;
 }
-
-/* boutons */
 
 .dish-actions button {
     background: white;
@@ -175,7 +185,6 @@ h1 {
 }
 
 /* info plat */
-
 .dish-info {
     padding: 10px;
     text-align: left;
@@ -183,16 +192,19 @@ h1 {
 }
 
 /* responsive */
-
 @media(max-width:600px) {
     #dish-list {
         flex-direction: column;
         align-items: center;
+        gap: 30px;
+    }
+
+    .category-group {
+        justify-content: center;
     }
 }
 
 /* switch style iphone */
-
 .switch {
     position: relative;
     display: inline-block;
@@ -262,9 +274,9 @@ input:checked + .slider:before {
     margin: 40px 0;
 }
 
-/* For Safari buttons/input fallback */
+/* Safari fallback */
 button, input, select, textarea {
     -webkit-appearance: none;
-    color: inherit;
+    color: inherit !important;
     font-family: inherit;
 }
