@@ -161,6 +161,7 @@ function renderDishGroup(dishes, container, isInactive = false) {
              <b>${escapeHtml(dish.name)}</b><br>
              ${formatPrice(dish.price)}<br>
              ${escapeHtml(dish.description || "")}
+             ${escapeHtml(dish.ingredients || "")}
          `;
 
         const actions = document.createElement("div");
