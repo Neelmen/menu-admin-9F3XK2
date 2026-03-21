@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     checkSession();
+    populateSubcategoryDatalist(); // <- Ajouté ici
 });
 
 /* ===============================
@@ -42,6 +43,7 @@ async function loginAdmin() {
     document.getElementById("admin-panel").style.display = "block";
 
     loadDishes();
+    populateSubcategoryDatalist();
 }
 
 /* ===============================
@@ -61,6 +63,7 @@ async function checkSession() {
         document.getElementById("login-section").style.display = "none";
         document.getElementById("admin-panel").style.display = "block";
         loadDishes();
+        populateSubcategoryDatalist();
     }
 }
 
@@ -295,7 +298,28 @@ async function handleDishSubmit(e) {
     }
 
     loadDishes();
+    populateSubcategoryDatalist(); // <- Met à jour les sous-catégories après ajout
     window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ===============================
+   POPULER LA DATALIST SOUS-CAT
+================================= */
+async function populateSubcategoryDatalist() {
+    const { data, error } = await client.from("dishes").select("subcategory");
+    if (error) return console.error("Erreur récupération sous-catégories :", error);
+
+    const datalist = document.getElementById("subcategory-list");
+    if (!datalist) return;
+
+    const uniqueSubs = [...new Set((data || []).map(d => d.subcategory).filter(s => s && s.trim() !== ""))];
+
+    datalist.innerHTML = "";
+    uniqueSubs.forEach(sub => {
+        const option = document.createElement("option");
+        option.value = sub;
+        datalist.appendChild(option);
+    });
 }
 
 /* ===============================
