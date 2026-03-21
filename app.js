@@ -160,7 +160,7 @@ function renderDishGroup(dishes, container, isInactive = false) {
         info.innerHTML = `
              <b>${escapeHtml(dish.name)}</b><br>
              ${formatPrice(dish.price)}<br>
-             ${escapeHtml(dish.description || "")}
+             ${escapeHtml(dish.description || "")}<br>
              ${escapeHtml(dish.ingredients || "")}
          `;
 
