@@ -5,7 +5,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    background: #f0f0f5;
+    background: #dcdcdc; /* gris clair */
     text-align: center;
     color: #333;
 }
@@ -36,7 +36,7 @@ h1 {
 }
 
 #login-section button {
-    background: #2b2b2b;
+    background: #4a90e2; /* bleu admin login */
     color: white;
     padding: 12px 20px;
     border: none;
@@ -45,25 +45,30 @@ h1 {
 }
 
 #login-section button:hover {
-    background: #e63946;
+    background: #357ABD;
 }
 
 /* ===============================
    ADMIN PANEL
 ================================= */
 #admin-panel {
-    max-width: 900px;
+    max-width: 1000px;
     margin: auto;
 }
 
 #admin-panel > button {
-    background: #DEDEDE;
+    background: #4a90e2; /* bleu pour Ajouter / Modifier / Bouton principal */
     color: white;
     border: none;
     padding: 12px 25px;
     border-radius: 25px;
     cursor: pointer;
     margin-bottom: 20px;
+    font-weight: bold;
+}
+
+#admin-panel > button:hover {
+    background: #357ABD;
 }
 
 /* ===============================
@@ -92,7 +97,7 @@ h1 {
 #dish-form button {
     display: block;
     margin: 20px auto;
-    background: #333;
+    background: #4a90e2; /* bleu boutons submit */
     color: white;
     padding: 12px 30px;
     border-radius: 8px;
@@ -102,7 +107,7 @@ h1 {
 }
 
 #dish-form button:hover {
-    background: #111;
+    background: #357ABD;
 }
 
 /* ===============================
@@ -114,19 +119,19 @@ h1 {
     gap: 40px; /* espace entre catégories */
 }
 
-/* Groupe de catégorie - grille 2 colonnes fixe */
+/* Chaque catégorie - grille 2 colonnes fixe */
 .category-group {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 colonnes fixes */
+    grid-template-columns: repeat(2, 1fr); /* toujours 2 colonnes */
     gap: 20px;
-    width: 100%;       /* prend toute la largeur du container */
+    width: 100%;
 }
 
 /* Card */
 .dish-card {
     background: white;
     border-radius: 15px;
-    width: 100%;       /* occupe toute la cellule de la grille */
+    width: 100%;       /* prend toute la cellule de la grille */
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     display: flex;
@@ -166,8 +171,8 @@ h1 {
 }
 
 .dish-actions button {
-    background: white;
-    color: #333;
+    background: #4a90e2; /* bleu */
+    color: white;
     border: none;
     padding: 8px 14px;
     border-radius: 8px;
@@ -176,8 +181,7 @@ h1 {
 }
 
 .dish-actions button:last-child {
-    background: #e63946;
-    color: white;
+    background: #e63946; /* rouge supprimer */
 }
 
 .dish-actions button:hover {
@@ -191,88 +195,10 @@ h1 {
     color: #333;
 }
 
-/* Supprime tout responsive pour les colonnes - toujours 2 colonnes */
-
-/* responsive */
-@media(max-width:600px) {
-    #dish-list {
-        flex-direction: column;
-        align-items: center;
-        gap: 30px;
-    }
-
-    .category-group {
-        justify-content: center;
-    }
-}
-
-/* switch style iphone */
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 26px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: .3s;
-    border-radius: 26px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 20px;
-    width: 20px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .3s;
-    border-radius: 50%;
-}
-
-input:checked + .slider {
-    background-color: #34c759;
-}
-
-input:checked + .slider:before {
-    transform: translateX(24px);
-}
-
-.file-upload {
-    display: inline-block;
-    padding: 10px 20px;
-    background: #eee;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    color: #333;
-}
-
-.file-upload input {
-    display: none;
-}
-
-.file-upload:hover {
-    background: #ddd;
-}
-
+/* Séparateur */
 .admin-separator {
     border: none;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #bbb;
     margin: 40px 0;
 }
 
