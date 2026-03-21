@@ -93,13 +93,12 @@ function getImagePublicUrl(imagePath) {
    CHARGER LES PLATS
 ================================= */
 async function loadDishes() {
-    // Récupération depuis Supabase
     const { data, error } = await client
         .from("dishes")
         .select("*")
         .order("category", { ascending: true })
-        .order("subcategory", { ascending: true }) // tri par subcategory
-        .order("name", { ascending: true });        // puis par nom
+        .order("subcategory", { ascending: true })
+        .order("name", { ascending: true });
 
     if (error) {
         console.error("Erreur chargement plats :", error);
@@ -125,19 +124,19 @@ async function loadDishes() {
     }
 }
 
-// =====================================
-// Dans renderDishGroup, on peut aussi ajouter un léger espace entre subcategories
-// =====================================
+/* ===============================
+   RENDER DISH GROUP 2 COLONNES
+================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
     let currentCategory = null;
     let grid = null;
 
     dishes.forEach(dish => {
-        // Nouveau bloc si changement de catégorie
+        // Crée un nouveau bloc pour chaque catégorie
         if (dish.category !== currentCategory) {
             currentCategory = dish.category;
             grid = document.createElement("div");
-            grid.className = "category-group"; // grille 2 colonnes
+            grid.className = "category-group"; // CSS gère 2 colonnes
             container.appendChild(grid);
         }
 
@@ -181,66 +180,8 @@ function renderDishGroup(dishes, container, isInactive = false) {
 
         card.appendChild(imageDiv);
         card.appendChild(info);
-        grid.appendChild(card);
-    });
-}
 
-function renderDishGroup(dishes, container, isInactive = false) {
-    let currentCategory = null;
-    let grid = null;
-
-    dishes.forEach(dish => {
-        if (dish.category !== currentCategory) {
-            currentCategory = dish.category;
-            grid = document.createElement("div");
-            grid.className = "dish-grid";
-            container.appendChild(grid);
-        }
-
-        const card = document.createElement("div");
-        card.className = "dish-card";
-        if (isInactive) card.classList.add("dish-disabled");
-
-        const imageDiv = document.createElement("div");
-        imageDiv.className = "dish-image";
-
-        if (dish.image_path) {
-            const img = document.createElement("img");
-            img.src = getImagePublicUrl(dish.image_path);
-            img.alt = dish.name || "Image du plat";
-            img.style.width = "100%";
-            img.style.borderRadius = "10px";
-            img.loading = "lazy";
-            imageDiv.appendChild(img);
-        }
-
-        const info = document.createElement("div");
-        info.className = "dish-info";
-        info.innerHTML = `<b>${escapeHtml(dish.name)}</b><br>${formatPrice(dish.price)}`;
-
-        const actions = document.createElement("div");
-        actions.className = "dish-actions";
-        actions.style.opacity = "0";
-        actions.innerHTML = `
-            <button type="button" onclick="toggleDish('${dish.id}', ${dish.available})">
-                ${dish.available ? "Désactiver" : "Activer"}
-            </button>
-            <button type="button" onclick="editDish('${dish.id}')">
-                Modifier
-            </button>
-            <button type="button" onclick="deleteDish('${dish.id}')">
-                Supprimer
-            </button>
-        `;
-
-        imageDiv.appendChild(actions);
-
-        imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
-        imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
-
-        card.appendChild(imageDiv);
-        card.appendChild(info);
-        grid.appendChild(card);
+        grid.appendChild(card); // Ajoute la carte à la grille
     });
 }
 
@@ -283,7 +224,6 @@ async function editDish(id) {
     const form = document.getElementById("dish-form");
     if (!form) return;
 
-    // Remplir le formulaire
     form.querySelector('input[name="name"]').value = data.name || "";
     form.querySelector('textarea[name="description"]').value = data.description || "";
     form.querySelector('input[name="price"]').value = data.price || "";
@@ -292,14 +232,11 @@ async function editDish(id) {
     form.querySelector('textarea[name="ingredients"]').value = data.ingredients || "";
     form.querySelector('input[name="available"]').checked = !!data.available;
 
-    // Stocker l'ID du plat pour la modification
     form.dataset.editId = id;
 
-    // Changer le texte du bouton
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) submitButton.innerText = "Modifier le plat";
 
-    // Scroll vers le formulaire
     form.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -328,18 +265,16 @@ async function handleDishSubmit(e) {
     const editId = form.dataset.editId;
 
     if (editId) {
-        // --------- MODIFICATION ---------
         const updateData = { name, description, price, category, subcategory, ingredients, available };
         if (image_path) updateData.image_path = image_path;
 
-        const { data, error } = await client.from("dishes").update(updateData).eq("id", editId);
+        const { error } = await client.from("dishes").update(updateData).eq("id", editId);
         if (error) return alert("Erreur modification plat : " + error.message);
 
         form.reset();
         delete form.dataset.editId;
         form.querySelector('button[type="submit"]').innerText = "Ajouter";
     } else {
-        // --------- AJOUT NOUVEAU ---------
         const { error } = await client.from("dishes").insert([{
             name, description, price, category, subcategory, ingredients, available, image_path
         }]);
