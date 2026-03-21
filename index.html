@@ -55,7 +55,9 @@
                 <option value="boisson">Boisson</option>
             </select>
 
-            <input type="text" id="subcategory" name="subcategory" placeholder="Sous catégorie">
+            <label for="subcategory">Sous-catégorie :</label>
+            <input list="subcategory-list" name="subcategory" id="subcategory">
+            <datalist id="subcategory-list"></datalist>
 
             <label class="file-upload">
                 Choisir une image
