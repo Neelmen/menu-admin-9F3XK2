@@ -116,19 +116,19 @@ async function loadDishes() {
     renderDishGroup(activeDishes, container);
 
     if (inactiveDishes.length > 0) {
-    const separator = document.createElement("hr");
-    separator.className = "admin-separator";
-    separator.style.margin = "50px 0 10px 0";
-    container.appendChild(separator);
+        const separator = document.createElement("hr");
+        separator.className = "admin-separator";
+        separator.style.margin = "50px 0 10px 0";
+        container.appendChild(separator);
 
-    const title = document.createElement("h2");
-    title.innerText = "DÉSACTIVÉS :";
-    title.style.textAlign = "left";
-    title.style.margin = "0 0 20px 0";
-    container.appendChild(title);
+        const title = document.createElement("h2");
+        title.innerText = "DÉSACTIVÉS :";
+        title.style.textAlign = "left";
+        title.style.margin = "0 0 20px 0";
+        container.appendChild(title);
 
-    renderDishGroup(inactiveDishes, container, true);
-}
+        renderDishGroup(inactiveDishes, container, true);
+    }
 }
 
 /* ===============================
@@ -155,13 +155,13 @@ function renderDishGroup(dishes, container, isInactive = false) {
 
         const title = document.createElement("h2");
         const labels = {
-    entree: "ENTRÉES",
-    plat: "PLATS",
-    dessert: "DESSERTS",
-    boisson: "BOISSONS"
-};
+            entree: "ENTRÉES",
+            plat: "PLATS",
+            dessert: "DESSERTS",
+            boisson: "BOISSONS"
+        };
 
-title.innerText = labels[category] || category.toUpperCase();
+        title.innerText = labels[category] || category.toUpperCase();
         title.style.textAlign = "left";
         title.style.margin = "0 0 20px 0";
         container.appendChild(title);
@@ -215,7 +215,6 @@ title.innerText = labels[category] || category.toUpperCase();
    CREATION CARTE PLAT
 ================================= */
 function createDishCard(dish, isInactive) {
-
     const card = document.createElement("div");
     card.className = "dish-card";
     if (isInactive) card.classList.add("dish-disabled");
@@ -255,35 +254,33 @@ function createDishCard(dish, isInactive) {
         </button>
     `;
 
-    let touchActive = false;
-    let touchTimeout;
+    const isDesktop = window.matchMedia("(hover: hover)").matches;
 
-    // hover pour desktop
-    imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
-    imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
+    if (isDesktop) {
+        imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
+        imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
+    } else {
+        let menuOpen = false;
+        imageDiv.addEventListener("click", (e) => {
+            if (!menuOpen) {
+                e.preventDefault();
+                actions.style.opacity = "1";
+                menuOpen = true;
 
-    // gestion touch pour mobile
-    imageDiv.addEventListener("click", (e) => {
-        // si le flag est actif, on laisse le clic passer normalement
-        if (touchActive) return;
-
-        e.preventDefault(); // bloque le clic initial
-        actions.style.opacity = "1";
-        touchActive = true;
-
-        // reset après 500ms si aucune action
-        clearTimeout(touchTimeout);
-        touchTimeout = setTimeout(() => {
-            actions.style.opacity = "0";
-            touchActive = false;
-        }, 500);
-    });
+                setTimeout(() => {
+                    actions.style.opacity = "0";
+                    menuOpen = false;
+                }, 3000);
+            }
+        });
+    }
 
     card.appendChild(imageDiv);
     card.appendChild(info);
 
     return card;
 }
+
 /* ===============================
    ACTIVER / DESACTIVER
 ================================= */
