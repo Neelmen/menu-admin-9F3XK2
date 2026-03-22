@@ -412,24 +412,29 @@ document.addEventListener("click", (e) => {
     if (!isMobile()) return;
 
     const imageDiv = e.target.closest(".dish-image");
+    const actions = imageDiv?.querySelector(".dish-actions");
     const clickedButton = e.target.closest(".dish-actions button");
 
-    // Si on clique sur un bouton → on laisse faire
-    if (clickedButton) return;
-
-    // Si on clique ailleurs → reset tout
-    document.querySelectorAll(".dish-actions").forEach(a => a.style.opacity = "0");
-
-    if (imageDiv) {
-        const actions = imageDiv.querySelector(".dish-actions");
-
-        // Si déjà ouvert → on ferme
-        if (actions.style.opacity === "1") {
-            actions.style.opacity = "0";
-        } else {
-            // Sinon on ouvre
-            actions.style.opacity = "1";
+    // 👉 Si on clique sur un bouton MAIS que le menu vient juste d’être ouvert → bloqué
+    if (clickedButton) {
+        if (!actions || actions.dataset.open !== "true") {
             e.preventDefault();
+            e.stopPropagation();
+            return;
         }
+        return; // autorise si déjà ouvert
+    }
+
+    // reset tout
+    document.querySelectorAll(".dish-actions").forEach(a => {
+        a.style.opacity = "0";
+        a.dataset.open = "false";
+    });
+
+    if (imageDiv && actions) {
+        // ouvre
+        actions.style.opacity = "1";
+        actions.dataset.open = "true";
+        e.preventDefault();
     }
 });
