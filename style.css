@@ -232,8 +232,8 @@ h1 {
     margin: 40px 0;
 }
 
-/* Safari fallback */
-button, input, select, textarea {
+/* Safari fallback - On exclut les checkbox pour qu'elles restent visibles */
+button, select, textarea, input:not([type="checkbox"]) {
     -webkit-appearance: none;
     color: inherit !important;
     font-family: inherit;
