@@ -214,7 +214,71 @@ title.innerText = labels[category] || category.toUpperCase();
 /* ===============================
    CREATION CARTE PLAT
 ================================= */
-createDishCard
+function createDishCard(dish, isInactive) {
+    const card = document.createElement("div");
+    card.className = "dish-card";
+    if (isInactive) card.classList.add("dish-disabled");
+
+    const imageDiv = document.createElement("div");
+    imageDiv.className = "dish-image";
+
+    if (dish.image_path) {
+        const img = document.createElement("img");
+        img.src = getImagePublicUrl(dish.image_path);
+        img.alt = dish.name || "Image du plat";
+        img.loading = "lazy";
+        imageDiv.appendChild(img);
+    }
+
+    const info = document.createElement("div");
+    info.className = "dish-info";
+    info.innerHTML = `
+      <b>• ${escapeHtml(dish.name)}</b><br>
+      ${formatPrice(dish.price)}<br>
+      ${dish.description ? `<b>Description :</b> ${escapeHtml(dish.description)}<br>` : ""}
+      ${dish.ingredients ? `<b>Ingrédients :</b> ${escapeHtml(dish.ingredients)}` : ""}
+    `;
+
+    // clic sur l'image → créer les boutons dynamiquement
+    imageDiv.addEventListener("click", () => {
+        // si les boutons existent déjà, on ne recrée pas
+        if (imageDiv.querySelector(".dish-actions")) return;
+
+        const actions = document.createElement("div");
+        actions.className = "dish-actions";
+        actions.style.position = "absolute";
+        actions.style.top = "0";
+        actions.style.left = "0";
+        actions.style.width = "100%";
+        actions.style.height = "100%";
+        actions.style.display = "flex";
+        actions.style.flexDirection = "column";
+        actions.style.justifyContent = "center";
+        actions.style.alignItems = "center";
+        actions.style.gap = "10px";
+        actions.style.background = "rgba(0,0,0,0.6)";
+
+        const toggleBtn = document.createElement("button");
+        toggleBtn.innerText = dish.available ? "Désactiver" : "Activer";
+        toggleBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleDish(dish.id, dish.available); });
+
+        const editBtn = document.createElement("button");
+        editBtn.innerText = "Modifier";
+        editBtn.addEventListener("click", (e) => { e.stopPropagation(); editDish(dish.id); });
+
+        const delBtn = document.createElement("button");
+        delBtn.innerText = "Supprimer";
+        delBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteDish(dish.id); });
+
+        actions.append(toggleBtn, editBtn, delBtn);
+        imageDiv.appendChild(actions);
+    });
+
+    card.appendChild(imageDiv);
+    card.appendChild(info);
+
+    return card;
+}
 
 /* ===============================
    ACTIVER / DESACTIVER
