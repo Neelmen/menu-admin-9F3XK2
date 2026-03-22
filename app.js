@@ -98,10 +98,7 @@ function getImagePublicUrl(imagePath) {
 async function loadDishes() {
     const { data, error } = await client
         .from("dishes")
-        .select("*")
-        .order("category", { ascending: true })
-        .order("subcategory", { ascending: true })
-        .order("name", { ascending: true });
+        .select("*");
 
     if (error) {
         console.error("Erreur chargement plats :", error);
@@ -117,6 +114,7 @@ async function loadDishes() {
     const inactiveDishes = (data || []).filter(d => !d.available);
 
     renderDishGroup(activeDishes, container);
+
     if (inactiveDishes.length > 0) {
         const separator = document.createElement("hr");
         separator.className = "admin-separator";
@@ -128,76 +126,130 @@ async function loadDishes() {
 }
 
 /* ===============================
-   RENDER DISH GROUP 2 COLONNES
+   RENDER AVEC CAT + SOUS-CAT
 ================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
-    let currentCategory = null;
-    let grid = null;
 
-    dishes.forEach((dish, index) => {
-        // Si nouvelle catégorie, insère un séparateur sauf pour la première
-        if (dish.category !== currentCategory) {
-            if (currentCategory !== null) {
-                const separator = document.createElement("hr");
-                separator.className = "admin-separator";
-                separator.style.margin = "50px 0";
-                container.appendChild(separator);
-            }
+    const categoryOrder = ["entrée", "plat", "dessert", "boisson"];
 
-            currentCategory = dish.category;
-            grid = document.createElement("div");
-            grid.className = "category-group"; // CSS gère 2 colonnes
+    categoryOrder.forEach(category => {
+
+        // Filtrer les plats de cette catégorie
+        const categoryDishes = dishes.filter(d => 
+            (d.category || "").toLowerCase() === category
+        );
+
+        if (categoryDishes.length === 0) return;
+
+        // ===== SEPARATEUR + TITRE CAT =====
+        const separator = document.createElement("hr");
+        separator.className = "admin-separator";
+        separator.style.margin = "50px 0 10px 0";
+        container.appendChild(separator);
+
+        const title = document.createElement("h2");
+        title.innerText = category.toUpperCase();
+        title.style.textAlign = "left";
+        title.style.margin = "0 0 20px 0";
+        container.appendChild(title);
+
+        // ===== GROUPE PAR SOUS-CAT =====
+        const withSub = categoryDishes.filter(d => d.subcategory && d.subcategory.trim() !== "");
+        const withoutSub = categoryDishes.filter(d => !d.subcategory || d.subcategory.trim() === "");
+
+        const subGroups = {};
+
+        withSub.forEach(dish => {
+            const key = dish.subcategory.trim();
+            if (!subGroups[key]) subGroups[key] = [];
+            subGroups[key].push(dish);
+        });
+
+        // ===== AFFICHAGE SOUS-CATEGORIES =====
+        Object.keys(subGroups).forEach(sub => {
+
+            const subTitle = document.createElement("h3");
+            subTitle.innerText = sub;
+            subTitle.style.textAlign = "left";
+            subTitle.style.margin = "20px 0 10px 0";
+            container.appendChild(subTitle);
+
+            const grid = document.createElement("div");
+            grid.className = "category-group";
             container.appendChild(grid);
+
+            subGroups[sub].forEach(dish => {
+                grid.appendChild(createDishCard(dish, isInactive));
+            });
+        });
+
+        // ===== SANS SOUS-CATEGORIE =====
+        if (withoutSub.length > 0) {
+            const grid = document.createElement("div");
+            grid.className = "category-group";
+            grid.style.marginTop = "20px";
+            container.appendChild(grid);
+
+            withoutSub.forEach(dish => {
+                grid.appendChild(createDishCard(dish, isInactive));
+            });
         }
 
-        const card = document.createElement("div");
-        card.className = "dish-card";
-        if (isInactive) card.classList.add("dish-disabled");
-
-        const imageDiv = document.createElement("div");
-        imageDiv.className = "dish-image";
-
-        if (dish.image_path) {
-            const img = document.createElement("img");
-            img.src = getImagePublicUrl(dish.image_path);
-            img.alt = dish.name || "Image du plat";
-            img.loading = "lazy";
-            imageDiv.appendChild(img);
-        }
-
-        const info = document.createElement("div");
-        info.className = "dish-info";
-        info.innerHTML = `
-          <b>• ${escapeHtml(dish.name)}</b><br>
-          ${formatPrice(dish.price)}<br>
-          ${dish.description ? `<b>Description :</b> ${escapeHtml(dish.description)}<br>` : ""}
-          ${dish.ingredients ? `<b>Ingrédients :</b> ${escapeHtml(dish.ingredients)}` : ""}
-        `;
-
-        const actions = document.createElement("div");
-        actions.className = "dish-actions";
-        actions.style.opacity = "0";
-        actions.innerHTML = `
-            <button type="button" onclick="toggleDish('${dish.id}', ${dish.available})">
-                ${dish.available ? "Désactiver" : "Activer"}
-            </button>
-            <button type="button" onclick="editDish('${dish.id}')">
-                Modifier
-            </button>
-            <button type="button" onclick="deleteDish('${dish.id}')">
-                Supprimer
-            </button>
-        `;
-
-        imageDiv.appendChild(actions);
-        imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
-        imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
-
-        card.appendChild(imageDiv);
-        card.appendChild(info);
-
-        grid.appendChild(card); // Ajoute la carte à la grille
     });
+}
+
+/* ===============================
+   CREATION CARTE PLAT
+================================= */
+function createDishCard(dish, isInactive) {
+
+    const card = document.createElement("div");
+    card.className = "dish-card";
+    if (isInactive) card.classList.add("dish-disabled");
+
+    const imageDiv = document.createElement("div");
+    imageDiv.className = "dish-image";
+
+    if (dish.image_path) {
+        const img = document.createElement("img");
+        img.src = getImagePublicUrl(dish.image_path);
+        img.alt = dish.name || "Image du plat";
+        img.loading = "lazy";
+        imageDiv.appendChild(img);
+    }
+
+    const info = document.createElement("div");
+    info.className = "dish-info";
+    info.innerHTML = `
+      <b>• ${escapeHtml(dish.name)}</b><br>
+      ${formatPrice(dish.price)}<br>
+      ${dish.description ? `<b>Description :</b> ${escapeHtml(dish.description)}<br>` : ""}
+      ${dish.ingredients ? `<b>Ingrédients :</b> ${escapeHtml(dish.ingredients)}` : ""}
+    `;
+
+    const actions = document.createElement("div");
+    actions.className = "dish-actions";
+    actions.style.opacity = "0";
+    actions.innerHTML = `
+        <button type="button" onclick="toggleDish('${dish.id}', ${dish.available})">
+            ${dish.available ? "Désactiver" : "Activer"}
+        </button>
+        <button type="button" onclick="editDish('${dish.id}')">
+            Modifier
+        </button>
+        <button type="button" onclick="deleteDish('${dish.id}')">
+            Supprimer
+        </button>
+    `;
+
+    imageDiv.appendChild(actions);
+    imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
+    imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
+
+    card.appendChild(imageDiv);
+    card.appendChild(info);
+
+    return card;
 }
 
 /* ===============================
