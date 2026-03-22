@@ -247,8 +247,4 @@ button, input, select, textarea {
 .ingredients {
     margin-top: 10px;
 }
-@media (hover: none) {
-    .dish-image:hover .dish-actions {
-        opacity: 0;
-    }
-}
+
