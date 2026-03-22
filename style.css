@@ -25,30 +25,30 @@ h1 {
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
-    #login-section input {
-        display: block;
-        width: 250px;
-        padding: 12px;
-        margin: 10px auto;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        color: #333;
-    }
+#login-section input {
+    display: block;
+    width: 250px;
+    padding: 12px;
+    margin: 10px auto;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    color: #333;
+}
 
-    #login-section button {
-        background: #ccc;
-        color: white;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
+#login-section button {
+    background: #ccc;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
 
-        #login-section button:hover {
-            background: #e63946;
-            color: white !important;
-        }
+#login-section button:hover {
+    background: #e63946;
+    color: white !important;
+}
 
 /* ===============================
    ADMIN PANEL
@@ -58,22 +58,22 @@ h1 {
     margin: auto;
 }
 
-    #admin-panel > button {
-        background: #ccc; /* couleur comme login */
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 25px;
-        cursor: pointer;
-        margin-bottom: 20px;
-        font-weight: bold;
-        transition: all 0.2s;
-    }
+#admin-panel > button {
+    background: #ccc;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
 
-        #admin-panel > button:hover {
-            background: #e63946;
-            color: white !important;
-        }
+#admin-panel > button:hover {
+    background: #e63946;
+    color: white !important;
+}
 
 /* ===============================
    FORM
@@ -87,34 +87,34 @@ h1 {
     text-align: left;
 }
 
-    #dish-form input,
-    #dish-form select,
-    #dish-form textarea {
-        width: calc(100% - 20px);
-        margin: 8px 0;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        color: #333;
-    }
+#dish-form input,
+#dish-form select,
+#dish-form textarea {
+    width: calc(100% - 20px);
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    color: #333;
+}
 
-    #dish-form button {
-        display: block;
-        margin: 20px auto;
-        background: #ccc;
-        color: white;
-        padding: 12px 30px;
-        border-radius: 8px;
-        border: none;
-        font-size: 16px;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
+#dish-form button {
+    display: block;
+    margin: 20px auto;
+    background: #ccc;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
 
-        #dish-form button:hover {
-            background: #e63946;
-            color: white !important;
-        }
+#dish-form button:hover {
+    background: #e63946;
+    color: white !important;
+}
 
 /* ===============================
    LISTE PLATS - ADMIN
@@ -122,15 +122,34 @@ h1 {
 #dish-list {
     display: flex;
     flex-direction: column;
-    gap: 40px;
+    gap: 20px;
 }
 
-/* Chaque catégorie - grille 2 colonnes fixe */
+/* ===== TITRES CATEGORIES ===== */
+#dish-list h2 {
+    font-size: 22px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 10px 0 20px 0;
+    text-align: left;
+}
+
+/* ===== TITRES SOUS-CATEGORIES ===== */
+#dish-list h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px 0 10px 0;
+    text-align: left;
+    color: #444;
+}
+
+/* Chaque catégorie - grille 2 colonnes */
 .category-group {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     width: 100%;
+    margin-bottom: 10px;
 }
 
 /* Card */
@@ -148,18 +167,18 @@ h1 {
 .dish-image {
     position: relative;
     width: 100%;
-    padding-top: 100%; /* 100% de la largeur → carré parfait */
+    padding-top: 100%;
     overflow: hidden;
 }
 
-    .dish-image img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+.dish-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
 /* OVERLAY ACTIONS */
 .dish-actions {
@@ -182,8 +201,8 @@ h1 {
     opacity: 1;
 }
 
-/* Tous les boutons sauf le dernier (Supprimer) */
-.dish-actions button:not(:last-child) {
+/* Boutons */
+.dish-actions button {
     background: #ccc;
     color: white;
     border: none;
@@ -194,26 +213,11 @@ h1 {
     transition: all 0.2s;
 }
 
-    .dish-actions button:not(:last-child):hover {
-        background: #e63946;
-        color: white !important;
-    }
-
-/* Dernier bouton Supprimer */
-.dish-actions button:last-child {
-    background: #ccc;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
-}
-.dish-actions button:last-child:hover {
+.dish-actions button:hover {
     background: #e63946;
     color: white !important;
 }
+
 /* Info plat */
 .dish-info {
     padding: 10px;
@@ -234,6 +238,8 @@ button, input, select, textarea {
     color: inherit !important;
     font-family: inherit;
 }
+
+/* Description / ingrédients */
 .description {
     margin-top: 5px;
 }
