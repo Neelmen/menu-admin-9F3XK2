@@ -116,13 +116,19 @@ async function loadDishes() {
     renderDishGroup(activeDishes, container);
 
     if (inactiveDishes.length > 0) {
-        const separator = document.createElement("hr");
-        separator.className = "admin-separator";
-        separator.style.margin = "50px 0";
-        container.appendChild(separator);
+    const separator = document.createElement("hr");
+    separator.className = "admin-separator";
+    separator.style.margin = "50px 0 10px 0";
+    container.appendChild(separator);
 
-        renderDishGroup(inactiveDishes, container, true);
-    }
+    const title = document.createElement("h2");
+    title.innerText = "DÉSACTIVÉS :";
+    title.style.textAlign = "left";
+    title.style.margin = "0 0 20px 0";
+    container.appendChild(title);
+
+    renderDishGroup(inactiveDishes, container, true);
+}
 }
 
 /* ===============================
