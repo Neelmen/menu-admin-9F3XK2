@@ -130,7 +130,7 @@ async function loadDishes() {
 ================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
 
-    const categoryOrder = ["entrée", "plat", "dessert", "boisson"];
+    const categoryOrder = ["entree", "plat", "dessert", "boisson"];
 
     categoryOrder.forEach(category => {
 
@@ -148,7 +148,14 @@ function renderDishGroup(dishes, container, isInactive = false) {
         container.appendChild(separator);
 
         const title = document.createElement("h2");
-        title.innerText = category.toUpperCase();
+        const labels = {
+    entree: "ENTRÉES",
+    plat: "PLATS",
+    dessert: "DESSERTS",
+    boisson: "BOISSONS"
+};
+
+title.innerText = labels[category] || category.toUpperCase();
         title.style.textAlign = "left";
         title.style.margin = "0 0 20px 0";
         container.appendChild(title);
