@@ -255,16 +255,35 @@ function createDishCard(dish, isInactive) {
         </button>
     `;
 
-    imageDiv.appendChild(actions);
+    let touchActive = false;
+    let touchTimeout;
+
+    // hover pour desktop
     imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
     imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
+
+    // gestion touch pour mobile
+    imageDiv.addEventListener("click", (e) => {
+        // si le flag est actif, on laisse le clic passer normalement
+        if (touchActive) return;
+
+        e.preventDefault(); // bloque le clic initial
+        actions.style.opacity = "1";
+        touchActive = true;
+
+        // reset après 500ms si aucune action
+        clearTimeout(touchTimeout);
+        touchTimeout = setTimeout(() => {
+            actions.style.opacity = "0";
+            touchActive = false;
+        }, 500);
+    });
 
     card.appendChild(imageDiv);
     card.appendChild(info);
 
     return card;
 }
-
 /* ===============================
    ACTIVER / DESACTIVER
 ================================= */
