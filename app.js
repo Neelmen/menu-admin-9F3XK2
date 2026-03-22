@@ -404,3 +404,32 @@ function escapeHtml(str) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
+function isMobile() {
+    return window.matchMedia("(hover: none)").matches;
+}
+
+document.addEventListener("click", (e) => {
+    if (!isMobile()) return;
+
+    const imageDiv = e.target.closest(".dish-image");
+    const clickedButton = e.target.closest(".dish-actions button");
+
+    // Si on clique sur un bouton → on laisse faire
+    if (clickedButton) return;
+
+    // Si on clique ailleurs → reset tout
+    document.querySelectorAll(".dish-actions").forEach(a => a.style.opacity = "0");
+
+    if (imageDiv) {
+        const actions = imageDiv.querySelector(".dish-actions");
+
+        // Si déjà ouvert → on ferme
+        if (actions.style.opacity === "1") {
+            actions.style.opacity = "0";
+        } else {
+            // Sinon on ouvre
+            actions.style.opacity = "1";
+            e.preventDefault();
+        }
+    }
+});
