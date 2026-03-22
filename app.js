@@ -214,56 +214,7 @@ title.innerText = labels[category] || category.toUpperCase();
 /* ===============================
    CREATION CARTE PLAT
 ================================= */
-function createDishCard(dish, isInactive) {
-
-    const card = document.createElement("div");
-    card.className = "dish-card";
-    if (isInactive) card.classList.add("dish-disabled");
-
-    const imageDiv = document.createElement("div");
-    imageDiv.className = "dish-image";
-
-    if (dish.image_path) {
-        const img = document.createElement("img");
-        img.src = getImagePublicUrl(dish.image_path);
-        img.alt = dish.name || "Image du plat";
-        img.loading = "lazy";
-        imageDiv.appendChild(img);
-    }
-
-    const info = document.createElement("div");
-    info.className = "dish-info";
-    info.innerHTML = `
-      <b>• ${escapeHtml(dish.name)}</b><br>
-      ${formatPrice(dish.price)}<br>
-      ${dish.description ? `<b>Description :</b> ${escapeHtml(dish.description)}<br>` : ""}
-      ${dish.ingredients ? `<b>Ingrédients :</b> ${escapeHtml(dish.ingredients)}` : ""}
-    `;
-
-    const actions = document.createElement("div");
-    actions.className = "dish-actions";
-    actions.style.opacity = "0";
-    actions.innerHTML = `
-        <button type="button" onclick="toggleDish('${dish.id}', ${dish.available})">
-            ${dish.available ? "Désactiver" : "Activer"}
-        </button>
-        <button type="button" onclick="editDish('${dish.id}')">
-            Modifier
-        </button>
-        <button type="button" onclick="deleteDish('${dish.id}')">
-            Supprimer
-        </button>
-    `;
-
-    imageDiv.appendChild(actions);
-    imageDiv.addEventListener("mouseenter", () => { actions.style.opacity = "1"; });
-    imageDiv.addEventListener("mouseleave", () => { actions.style.opacity = "0"; });
-
-    card.appendChild(imageDiv);
-    card.appendChild(info);
-
-    return card;
-}
+createDishCard
 
 /* ===============================
    ACTIVER / DESACTIVER
