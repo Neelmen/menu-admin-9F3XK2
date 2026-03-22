@@ -404,37 +404,38 @@ function escapeHtml(str) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
-function isMobile() {
-    return window.matchMedia("(hover: none)").matches;
-}
+let touchDevice = false;
+
+// détecte si le premier événement touchstart arrive → on est sur un appareil tactile
+document.addEventListener("touchstart", () => { touchDevice = true; }, { once: true });
 
 document.addEventListener("click", (e) => {
-    if (!isMobile()) return;
+    if (!touchDevice) return; // si pas tactile, on laisse le hover normal
 
     const imageDiv = e.target.closest(".dish-image");
     const actions = imageDiv?.querySelector(".dish-actions");
     const clickedButton = e.target.closest(".dish-actions button");
 
-    // 👉 Si on clique sur un bouton MAIS que le menu vient juste d’être ouvert → bloqué
     if (clickedButton) {
+        // si le menu n'est pas encore ouvert → bloquer le clic
         if (!actions || actions.dataset.open !== "true") {
             e.preventDefault();
             e.stopPropagation();
             return;
         }
-        return; // autorise si déjà ouvert
+        return; // sinon autorise
     }
 
-    // reset tout
+    // ferme tous les autres menus
     document.querySelectorAll(".dish-actions").forEach(a => {
         a.style.opacity = "0";
         a.dataset.open = "false";
     });
 
+    // ouvre le menu touché
     if (imageDiv && actions) {
-        // ouvre
         actions.style.opacity = "1";
         actions.dataset.open = "true";
-        e.preventDefault();
+        e.preventDefault(); // bloque le clic sur l'image elle-même
     }
 });
