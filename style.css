@@ -288,3 +288,40 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(20px);
 }
+/* Style moderne pour le bouton de sélection d'image */
+.file-upload {
+    display: inline-block;
+    background-color: #333; /* Noir pour contraster */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.file-upload:hover {
+    background-color: #e63946; /* Rouge au survol */
+}
+
+/* On cache l'input moche par défaut */
+#image_file {
+    display: none;
+}
+
+/* Zone d'aperçu image juste sous le bouton */
+#image-preview {
+    margin: 5px 0 15px 0;
+    text-align: left;
+}
+
+#image-preview img {
+    max-width: 150px;
+    height: auto;
+    border-radius: 10px;
+    border: 3px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
