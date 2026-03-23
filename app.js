@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     checkSession();
-    populateSubcategoryDatalist(); // <- Ajouté ici
+    populateSubcategoryDatalist();
 });
 
 /* ===============================
@@ -96,9 +96,7 @@ function getImagePublicUrl(imagePath) {
    CHARGER LES PLATS
 ================================= */
 async function loadDishes() {
-    const { data, error } = await client
-        .from("dishes")
-        .select("*");
+    const { data, error } = await client.from("dishes").select("*");
 
     if (error) {
         console.error("Erreur chargement plats :", error);
@@ -116,129 +114,89 @@ async function loadDishes() {
     renderDishGroup(activeDishes, container);
 
     if (inactiveDishes.length > 0) {
-    const separator = document.createElement("hr");
-    separator.className = "admin-separator";
-    separator.style.margin = "50px 0 10px 0";
-    container.appendChild(separator);
-
-    const title = document.createElement("h2");
-    title.innerText = "DÉSACTIVÉS :";
-    title.style.textAlign = "left";
-    title.style.margin = "0 0 20px 0";
-    container.appendChild(title);
-
-    renderDishGroup(inactiveDishes, container, true);
-}
-}
-
-/* ===============================
-   RENDER AVEC CAT + SOUS-CAT
-================================= */
-function renderDishGroup(dishes, container, isInactive = false) {
-
-    const categoryOrder = ["entree", "plat", "dessert", "boisson"];
-
-    categoryOrder.forEach(category => {
-
-        // Filtrer les plats de cette catégorie
-        const categoryDishes = dishes.filter(d => 
-            (d.category || "").toLowerCase() === category
-        );
-
-        if (categoryDishes.length === 0) return;
-
-        // ===== SEPARATEUR + TITRE CAT =====
         const separator = document.createElement("hr");
         separator.className = "admin-separator";
         separator.style.margin = "50px 0 10px 0";
         container.appendChild(separator);
 
         const title = document.createElement("h2");
-        const labels = {
-    entree: "ENTRÉES",
-    plat: "PLATS",
-    dessert: "DESSERTS",
-    boisson: "BOISSONS"
-};
-
-title.innerText = labels[category] || category.toUpperCase();
+        title.innerText = "DÉSACTIVÉS :";
         title.style.textAlign = "left";
         title.style.margin = "0 0 20px 0";
         container.appendChild(title);
 
-        // ===== GROUPE PAR SOUS-CAT =====
+        renderDishGroup(inactiveDishes, container, true);
+    }
+}
+
+/* ===============================
+   RENDER AVEC CAT + SOUS-CAT
+================================= */
+function renderDishGroup(dishes, container, isInactive = false) {
+    const categoryOrder = ["entree", "plat", "dessert", "boisson"];
+
+    categoryOrder.forEach(category => {
+        const categoryDishes = dishes.filter(d => (d.category || "").toLowerCase() === category);
+        if (categoryDishes.length === 0) return;
+
+        const separator = document.createElement("hr");
+        separator.className = "admin-separator";
+        separator.style.margin = "50px 0 10px 0";
+        container.appendChild(separator);
+
+        const title = document.createElement("h2");
+        const labels = { entree: "ENTRÉES", plat: "PLATS", dessert: "DESSERTS", boisson: "BOISSONS" };
+        title.innerText = labels[category] || category.toUpperCase();
+        title.style.textAlign = "left";
+        title.style.margin = "0 0 20px 0";
+        container.appendChild(title);
+
         const withSub = categoryDishes.filter(d => d.subcategory && d.subcategory.trim() !== "");
         const withoutSub = categoryDishes.filter(d => !d.subcategory || d.subcategory.trim() === "");
 
-        // ===== GROUPE PAR SOUS-CAT AVEC "Autre" PAR DEFAUT =====
-const subGroups = {};
+        // ===== GROUPE PAR SOUS-CAT + AJOUT DES SANS SOUS-CAT DANS "Autre" =====
+        const subGroups = {};
 
-// Ajouter les plats avec sous-catégorie
-withSub.forEach(dish => {
-    const key = dish.subcategory.trim();
-    if (!subGroups[key]) subGroups[key] = [];
-    subGroups[key].push(dish);
-});
+        withSub.forEach(dish => {
+            const key = dish.subcategory.trim();
+            if (!subGroups[key]) subGroups[key] = [];
+            subGroups[key].push(dish);
+        });
 
-// Ajouter les plats sans sous-catégorie dans "Autre"
-if (withoutSub.length > 0) {
-    const key = "Autre";
-    if (!subGroups[key]) subGroups[key] = [];
-    subGroups[key] = subGroups[key].concat(withoutSub);
-}
+        if (withoutSub.length > 0) {
+            const key = "Autre";
+            if (!subGroups[key]) subGroups[key] = [];
+            subGroups[key] = subGroups[key].concat(withoutSub);
+        }
 
-// ===== AFFICHAGE SOUS-CATEGORIES (tri par nombre de plats, clé "Autre" en dernier) =====
-let subKeys = Object.keys(subGroups);
+        // ===== TRI ET AFFICHAGE =====
+        let subKeys = Object.keys(subGroups);
+        subKeys.sort((a, b) => subGroups[b].length - subGroups[a].length);
 
-// Trier par nombre de plats (descendant)
-subKeys.sort((a, b) => subGroups[b].length - subGroups[a].length);
+        const autreIndex = subKeys.indexOf("Autre");
+        if (autreIndex !== -1) {
+            subKeys.splice(autreIndex, 1);
+            subKeys.push("Autre");
+        }
 
-// Si "Autre" existe, la mettre à la fin
-const autreIndex = subKeys.indexOf("Autre");
-if (autreIndex !== -1) {
-    subKeys.splice(autreIndex, 1);
-    subKeys.push("Autre");
-}
+        subKeys.forEach(sub => {
+            let displayName = sub;
+            if (sub === "Autre" && subGroups[sub].length > 1) displayName = "Autres";
 
-subKeys.forEach(sub => {
-    // Ajouter "s" si la catégorie est "Autre" et contient plusieurs plats
-    let displayName = sub;
-    if (sub === "Autre" && subGroups[sub].length > 1) {
-        displayName = "Autres";
-    }
+            const subTitle = document.createElement("h3");
+            subTitle.innerText = displayName;
+            subTitle.style.textAlign = "left";
+            subTitle.style.margin = "20px 0 10px 0";
+            container.appendChild(subTitle);
 
-    const subTitle = document.createElement("h3");
-    subTitle.innerText = displayName;
-    subTitle.style.textAlign = "left";
-    subTitle.style.margin = "20px 0 10px 0";
-    container.appendChild(subTitle);
+            const grid = document.createElement("div");
+            grid.className = "category-group";
+            container.appendChild(grid);
 
-    const grid = document.createElement("div");
-    grid.className = "category-group";
-    container.appendChild(grid);
-
-    subGroups[sub].forEach(dish => {
-        grid.appendChild(createDishCard(dish, isInactive));
-    });
-});
-
-       // ===== AJOUTER LES PLATS SANS SOUS-CATEGORIE DANS "Autre" =====
-if (withoutSub.length > 0) {
-    const key = "Autre";
-    if (!subGroups[key]) subGroups[key] = [];
-    subGroups[key] = subGroups[key].concat(withoutSub);
-}
-
-    // Mettre "Autre" ou "Autres" selon le nombre de plats
-    let displayName = key;
-    if (subGroups[key].length > 1) displayName = "Autres";
-
-    // Si "Autre" n'est pas déjà à la fin de subKeys, l'ajouter
-    if (!subKeys.includes(key)) {
-        subKeys.push(key);
-    }
-}
-
+            subGroups[sub].forEach(dish => {
+                grid.appendChild(createDishCard(dish, isInactive));
+            });
+        });
     });
 }
 
@@ -270,9 +228,7 @@ function createDishCard(dish, isInactive) {
       ${dish.ingredients ? `<b>Ingrédients :</b> ${escapeHtml(dish.ingredients)}` : ""}
     `;
 
-    // clic sur l'image → créer les boutons dynamiquement
     imageDiv.addEventListener("click", () => {
-        // si les boutons existent déjà, on ne recrée pas
         if (imageDiv.querySelector(".dish-actions")) return;
 
         const actions = document.createElement("div");
@@ -291,15 +247,15 @@ function createDishCard(dish, isInactive) {
 
         const toggleBtn = document.createElement("button");
         toggleBtn.innerText = dish.available ? "Désactiver" : "Activer";
-        toggleBtn.addEventListener("click", (e) => { e.stopPropagation(); toggleDish(dish.id, dish.available); });
+        toggleBtn.addEventListener("click", e => { e.stopPropagation(); toggleDish(dish.id, dish.available); });
 
         const editBtn = document.createElement("button");
         editBtn.innerText = "Modifier";
-        editBtn.addEventListener("click", (e) => { e.stopPropagation(); editDish(dish.id); });
+        editBtn.addEventListener("click", e => { e.stopPropagation(); editDish(dish.id); });
 
         const delBtn = document.createElement("button");
         delBtn.innerText = "Supprimer";
-        delBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteDish(dish.id); });
+        delBtn.addEventListener("click", e => { e.stopPropagation(); deleteDish(dish.id); });
 
         actions.append(toggleBtn, editBtn, delBtn);
         imageDiv.appendChild(actions);
@@ -409,7 +365,7 @@ async function handleDishSubmit(e) {
     }
 
     loadDishes();
-    populateSubcategoryDatalist(); // <- Met à jour les sous-catégories après ajout
+    populateSubcategoryDatalist();
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
