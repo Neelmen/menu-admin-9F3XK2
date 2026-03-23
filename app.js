@@ -178,23 +178,34 @@ title.innerText = labels[category] || category.toUpperCase();
             subGroups[key].push(dish);
         });
 
-        // ===== AFFICHAGE SOUS-CATEGORIES =====
-        Object.keys(subGroups).forEach(sub => {
+        // ===== AFFICHAGE SOUS-CATEGORIES (tri par nombre de plats, clé vide en dernier) =====
+let subKeys = Object.keys(subGroups);
 
-            const subTitle = document.createElement("h3");
-            subTitle.innerText = sub;
-            subTitle.style.textAlign = "left";
-            subTitle.style.margin = "20px 0 10px 0";
-            container.appendChild(subTitle);
+// Trier par nombre de plats (descendant)
+subKeys.sort((a, b) => subGroups[b].length - subGroups[a].length);
 
-            const grid = document.createElement("div");
-            grid.className = "category-group";
-            container.appendChild(grid);
+// Si une clé vide existe, la mettre à la fin
+const emptyIndex = subKeys.indexOf("");
+if (emptyIndex !== -1) {
+    subKeys.splice(emptyIndex, 1); // retirer la clé vide
+    subKeys.push("");              // la remettre à la fin
+}
 
-            subGroups[sub].forEach(dish => {
-                grid.appendChild(createDishCard(dish, isInactive));
-            });
-        });
+subKeys.forEach(sub => {
+    const subTitle = document.createElement("h3");
+    subTitle.innerText = sub || "Autres";
+    subTitle.style.textAlign = "left";
+    subTitle.style.margin = "20px 0 10px 0";
+    container.appendChild(subTitle);
+
+    const grid = document.createElement("div");
+    grid.className = "category-group";
+    container.appendChild(grid);
+
+    subGroups[sub].forEach(dish => {
+        grid.appendChild(createDishCard(dish, isInactive));
+    });
+});
 
         // ===== SANS SOUS-CATEGORIE =====
         if (withoutSub.length > 0) {
