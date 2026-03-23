@@ -214,17 +214,21 @@ subKeys.forEach(sub => {
     });
 });
 
-        // ===== SANS SOUS-CATEGORIE =====
-        if (withoutSub.length > 0) {
-            const grid = document.createElement("div");
-            grid.className = "category-group";
-            grid.style.marginTop = "20px";
-            container.appendChild(grid);
+       // ===== AJOUTER LES PLATS SANS SOUS-CATEGORIE DANS "Autre" =====
+if (withoutSub.length > 0) {
+    const key = "Autre";
+    if (!subGroups[key]) subGroups[key] = [];
+    subGroups[key] = subGroups[key].concat(withoutSub);
 
-            withoutSub.forEach(dish => {
-                grid.appendChild(createDishCard(dish, isInactive));
-            });
-        }
+    // Mettre "Autre" ou "Autres" selon le nombre de plats
+    let displayName = key;
+    if (subGroups[key].length > 1) displayName = "Autres";
+
+    // Si "Autre" n'est pas déjà à la fin de subKeys, l'ajouter
+    if (!subKeys.includes(key)) {
+        subKeys.push(key);
+    }
+}
 
     });
 }
