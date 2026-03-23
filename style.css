@@ -282,7 +282,7 @@ button, select, textarea, input:not([type="checkbox"]) {
 }
 
 input:checked + .slider {
-  background-color: #e63946; /* Rouge comme tes autres boutons */
+  background-color: #33DE1B; /* Rouge comme tes autres boutons */
 }
 
 input:checked + .slider:before {
