@@ -173,11 +173,19 @@ title.innerText = labels[category] || category.toUpperCase();
         // ===== GROUPE PAR SOUS-CAT AVEC "Autre" PAR DEFAUT =====
 const subGroups = {};
 
+// Ajouter les plats avec sous-catégorie
 withSub.forEach(dish => {
-    let key = dish.subcategory && dish.subcategory.trim() !== "" ? dish.subcategory.trim() : "Autre";
+    const key = dish.subcategory.trim();
     if (!subGroups[key]) subGroups[key] = [];
     subGroups[key].push(dish);
 });
+
+// Ajouter les plats sans sous-catégorie dans "Autre"
+if (withoutSub.length > 0) {
+    const key = "Autre";
+    if (!subGroups[key]) subGroups[key] = [];
+    subGroups[key] = subGroups[key].concat(withoutSub);
+}
 
 // ===== AFFICHAGE SOUS-CATEGORIES (tri par nombre de plats, clé "Autre" en dernier) =====
 let subKeys = Object.keys(subGroups);
