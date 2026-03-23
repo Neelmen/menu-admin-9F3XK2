@@ -170,30 +170,37 @@ title.innerText = labels[category] || category.toUpperCase();
         const withSub = categoryDishes.filter(d => d.subcategory && d.subcategory.trim() !== "");
         const withoutSub = categoryDishes.filter(d => !d.subcategory || d.subcategory.trim() === "");
 
-        const subGroups = {};
+        // ===== GROUPE PAR SOUS-CAT AVEC "Autre" PAR DEFAUT =====
+const subGroups = {};
 
-        withSub.forEach(dish => {
-            const key = dish.subcategory.trim();
-            if (!subGroups[key]) subGroups[key] = [];
-            subGroups[key].push(dish);
-        });
+withSub.forEach(dish => {
+    let key = dish.subcategory && dish.subcategory.trim() !== "" ? dish.subcategory.trim() : "Autre";
+    if (!subGroups[key]) subGroups[key] = [];
+    subGroups[key].push(dish);
+});
 
-        // ===== AFFICHAGE SOUS-CATEGORIES (tri par nombre de plats, clé vide en dernier) =====
+// ===== AFFICHAGE SOUS-CATEGORIES (tri par nombre de plats, clé "Autre" en dernier) =====
 let subKeys = Object.keys(subGroups);
 
 // Trier par nombre de plats (descendant)
 subKeys.sort((a, b) => subGroups[b].length - subGroups[a].length);
 
-// Si une clé vide existe, la mettre à la fin
-const emptyIndex = subKeys.indexOf("");
-if (emptyIndex !== -1) {
-    subKeys.splice(emptyIndex, 1); // retirer la clé vide
-    subKeys.push("");              // la remettre à la fin
+// Si "Autre" existe, la mettre à la fin
+const autreIndex = subKeys.indexOf("Autre");
+if (autreIndex !== -1) {
+    subKeys.splice(autreIndex, 1);
+    subKeys.push("Autre");
 }
 
 subKeys.forEach(sub => {
+    // Ajouter "s" si la catégorie est "Autre" et contient plusieurs plats
+    let displayName = sub;
+    if (sub === "Autre" && subGroups[sub].length > 1) {
+        displayName = "Autres";
+    }
+
     const subTitle = document.createElement("h3");
-    subTitle.innerText = sub || "Autres";
+    subTitle.innerText = displayName;
     subTitle.style.textAlign = "left";
     subTitle.style.margin = "20px 0 10px 0";
     container.appendChild(subTitle);
