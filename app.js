@@ -219,6 +219,7 @@ if (withoutSub.length > 0) {
     const key = "Autre";
     if (!subGroups[key]) subGroups[key] = [];
     subGroups[key] = subGroups[key].concat(withoutSub);
+}
 
     // Mettre "Autre" ou "Autres" selon le nombre de plats
     let displayName = key;
