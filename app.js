@@ -154,7 +154,6 @@ function renderDishGroup(dishes, container, isInactive = false) {
         const withSub = categoryDishes.filter(d => d.subcategory && d.subcategory.trim() !== "");
         const withoutSub = categoryDishes.filter(d => !d.subcategory || d.subcategory.trim() === "");
 
-        // ===== GROUPE PAR SOUS-CAT + AJOUT DES SANS SOUS-CAT DANS "Autre" =====
         const subGroups = {};
 
         withSub.forEach(dish => {
@@ -169,7 +168,6 @@ function renderDishGroup(dishes, container, isInactive = false) {
             subGroups[key] = subGroups[key].concat(withoutSub);
         }
 
-        // ===== TRI ET AFFICHAGE =====
         let subKeys = Object.keys(subGroups);
         subKeys.sort((a, b) => subGroups[b].length - subGroups[a].length);
 
@@ -306,6 +304,12 @@ async function editDish(id) {
     const form = document.getElementById("dish-form");
     if (!form) return;
 
+    // reset preview avant de remplir le formulaire
+    const fileInput = form.querySelector('input[name="image_file"]');
+    if (fileInput) fileInput.value = "";
+    const preview = document.getElementById("image-preview");
+    if (preview) preview.innerHTML = "";
+
     form.querySelector('input[name="name"]').value = data.name || "";
     form.querySelector('textarea[name="description"]').value = data.description || "";
     form.querySelector('input[name="price"]').value = data.price || "";
@@ -352,16 +356,23 @@ async function handleDishSubmit(e) {
 
         const { error } = await client.from("dishes").update(updateData).eq("id", editId);
         if (error) return alert("Erreur modification plat : " + error.message);
-
-        form.reset();
-        delete form.dataset.editId;
-        form.querySelector('button[type="submit"]').innerText = "Ajouter";
     } else {
         const { error } = await client.from("dishes").insert([{
             name, description, price, category, subcategory, ingredients, available, image_path
         }]);
         if (error) return alert("Erreur ajout plat : " + error.message);
-        form.reset();
+    }
+
+    // reset form + preview après submit
+    form.reset();
+    const fileInput = form.querySelector('input[name="image_file"]');
+    if (fileInput) fileInput.value = "";
+    const preview = document.getElementById("image-preview");
+    if (preview) preview.innerHTML = "";
+
+    if (editId) {
+        delete form.dataset.editId;
+        form.querySelector('button[type="submit"]').innerText = "Ajouter";
     }
 
     loadDishes();
