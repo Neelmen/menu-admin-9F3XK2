@@ -1,0 +1,327 @@
+/* ===============================
+   Styles généraux admin
+================================= */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background: #e1c699;
+    text-align: center;
+    color: #333;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+/* ===============================
+   LOGIN
+================================= */
+#login-section {
+    background: white;
+    display: inline-block;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+#login-section input {
+    display: block;
+    width: 250px;
+    padding: 12px;
+    margin: 10px auto;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+#login-section button {
+    background: #ccc;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#login-section button:hover {
+    background: #e63946;
+    color: white !important;
+}
+
+/* ===============================
+   ADMIN PANEL
+================================= */
+#admin-panel {
+    max-width: 1000px;
+    margin: auto;
+}
+
+#admin-panel > button {
+    background: #ccc;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 25px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+#admin-panel > button:hover {
+    background: #e63946;
+    color: white !important;
+}
+
+/* ===============================
+   FORM
+================================= */
+#dish-form {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: left;
+}
+
+#dish-form input,
+#dish-form select,
+#dish-form textarea {
+    width: calc(100% - 20px);
+    margin: 8px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+#dish-form button {
+    display: block;
+    margin: 20px auto;
+    background: #ccc;
+    color: white;
+    padding: 12px 30px;
+    border-radius: 8px;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#dish-form button:hover {
+    background: #e63946;
+    color: white !important;
+}
+
+/* ===============================
+   LISTE PLATS - ADMIN
+================================= */
+#dish-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ===== TITRES CATEGORIES ===== */
+#dish-list h2 {
+    font-size: 22px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 10px 0 20px 0;
+    text-align: left;
+}
+
+/* ===== TITRES SOUS-CATEGORIES ===== */
+#dish-list h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px 0 10px 0;
+    text-align: left;
+    color: #444;
+}
+
+/* Chaque catégorie - grille 2 colonnes */
+.category-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Card */
+.dish-card {
+    background: white;
+    border-radius: 15px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+/* IMAGE */
+.dish-image {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    overflow: hidden;
+}
+
+.dish-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* OVERLAY ACTIONS */
+.dish-actions {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.dish-image:hover .dish-actions {
+    opacity: 1;
+}
+
+/* Boutons */
+.dish-actions button {
+    background: #ccc;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.dish-actions button:hover {
+    background: #e63946;
+    color: white !important;
+}
+
+/* Info plat */
+.dish-info {
+    padding: 10px;
+    text-align: left;
+    color: #333;
+}
+
+/* Séparateur */
+.admin-separator {
+    border: none;
+    border-top: 1px solid #bbb;
+    margin: 40px 0;
+}
+
+/* Safari fallback - On exclut les checkbox pour qu'elles restent visibles */
+button, select, textarea, input:not([type="checkbox"]) {
+    -webkit-appearance: none;
+    color: inherit !important;
+    font-family: inherit;
+}
+
+/* Description / ingrédients */
+.description {
+    margin-top: 5px;
+}
+
+.ingredients {
+    margin-top: 10px;
+}
+/* Style pour le bouton activable (Switch) */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  vertical-align: middle;
+  margin-left: 10px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0; height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 20px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 14px; width: 14px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #33DE1B; /* Rouge comme tes autres boutons */
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+/* Style moderne pour le bouton de sélection d'image */
+.file-upload {
+    display: inline-block;
+    background-color: #333; /* Noir pour contraster */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.file-upload:hover {
+    background-color: #e63946; /* Rouge au survol */
+}
+
+/* On cache l'input moche par défaut */
+#image_file {
+    display: none;
+}
+
+/* Zone d'aperçu image juste sous le bouton */
+#image-preview {
+    margin: 5px 0 15px 0;
+    text-align: left;
+}
+
+#image-preview img {
+    max-width: 150px;
+    height: auto;
+    border-radius: 10px;
+    border: 3px solid white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
