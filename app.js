@@ -133,7 +133,7 @@ async function loadDishes() {
    RENDER AVEC CAT + SOUS-CAT
 ================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
-    const categoryOrder = ["entree", "plat", "dessert", "boisson"];
+    const categoryOrder = ["entree", "plat", "dessert", "boisson", "accompagnement"];
 
     categoryOrder.forEach(category => {
         const categoryDishes = dishes.filter(d => (d.category || "").toLowerCase() === category);
@@ -145,7 +145,7 @@ function renderDishGroup(dishes, container, isInactive = false) {
         container.appendChild(separator);
 
         const title = document.createElement("h2");
-        const labels = { entree: "ENTRÉES", plat: "PLATS", dessert: "DESSERTS", boisson: "BOISSONS" };
+        const labels = { entree: "ENTRÉES", plat: "PLATS", dessert: "DESSERTS", boisson: "BOISSONS", accompagnement: "ACCOMPAGNEMENTS" };
         title.innerText = labels[category] || category.toUpperCase();
         title.style.textAlign = "left";
         title.style.margin = "0 0 20px 0";
