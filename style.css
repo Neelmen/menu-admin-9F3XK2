@@ -156,11 +156,6 @@ h1 {
         grid-template-columns: repeat(2, 1fr);
     }
 }
-@media (max-width: 1200px) {
-    body {
-        background: red;
-    }
-}
 /* Card */
 .dish-card {
     background: white;
