@@ -146,16 +146,16 @@ h1 {
 /* Chaque catégorie - grille 6 colonnes fixes */
 .category-group {
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 320px));
-    justify-content: center;
+    grid-template-columns: repeat(6, 1fr); /* important */
     gap: 20px;
 }
+
+/* Mobile */
 @media (max-width: 1200px) {
     .category-group {
         grid-template-columns: repeat(2, 1fr);
     }
 }
-
 /* Card */
 .dish-card {
     background: white;
