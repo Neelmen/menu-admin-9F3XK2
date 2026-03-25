@@ -143,10 +143,10 @@ h1 {
     color: #444;
 }
 
-/* Chaque catégorie - grille 2 colonnes */
+/* Chaque catégorie - grille 6 colonnes fixes */
 .category-group {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 320px));
+    grid-template-columns: repeat(6, minmax(0, 320px));
     justify-content: center;
     gap: 20px;
 }
@@ -156,8 +156,8 @@ h1 {
     background: white;
     border-radius: 15px;
     width: 100%;
-    max-width: 320px; /* limite taille */
-    margin: 0 auto;   /* centre */
+    max-width: 320px;
+    margin: 0 auto;
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     display: flex;
