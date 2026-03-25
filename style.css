@@ -85,6 +85,7 @@ h1 {
     margin-bottom: 30px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     text-align: left;
+    max-width: 600px;
 }
 
 #dish-form input,
