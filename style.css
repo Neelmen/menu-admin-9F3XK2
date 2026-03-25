@@ -150,6 +150,11 @@ h1 {
     justify-content: center;
     gap: 20px;
 }
+@media (max-width: 1200px) {
+    .category-group {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
 
 /* Card */
 .dish-card {
