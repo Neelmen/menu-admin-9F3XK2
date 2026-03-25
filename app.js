@@ -133,7 +133,7 @@ async function loadDishes() {
    RENDER AVEC CAT + SOUS-CAT
 ================================= */
 function renderDishGroup(dishes, container, isInactive = false) {
-    const categoryOrder = ["entree", "plat", "dessert", "boisson", "accompagnement"];
+    const categoryOrder = ["entree", "plat", "accompagnement","dessert", "boisson"];
 
     categoryOrder.forEach(category => {
         const categoryDishes = dishes.filter(d => (d.category || "").toLowerCase() === category);
