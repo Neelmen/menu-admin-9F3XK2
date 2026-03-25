@@ -146,10 +146,9 @@ h1 {
 /* Chaque catégorie - grille 2 colonnes */
 .category-group {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(250px, 320px));
+    justify-content: center;
     gap: 20px;
-    width: 100%;
-    margin-bottom: 10px;
 }
 
 /* Card */
@@ -157,6 +156,8 @@ h1 {
     background: white;
     border-radius: 15px;
     width: 100%;
+    max-width: 320px; /* limite taille */
+    margin: 0 auto;   /* centre */
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     display: flex;
