@@ -67,29 +67,78 @@ async function checkSession() {
     }
 }
 
+/**
+ * Convertit n'importe quel fichier image en WebP de manière asynchrone
+ * @param {File} file - Le fichier original sélectionné dans l'input
+ * @returns {Promise<Blob>} - Le fichier converti en format Blob WebP
+ */
+async function processImageToWebP(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                // On peut réduire légèrement la taille ici si l'image est immense (ex: max 1200px)
+                const MAX_WIDTH = 1200;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Conversion en WebP avec une qualité de 0.8 (80%)
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error("Erreur de conversion WebP"));
+                }, "image/webp", 0.8);
+            };
+            img.onerror = reject;
+        };
+        reader.onerror = reject;
+    });
+}
 /* ===============================
    OUTILS IMAGES
 ================================= */
 async function uploadImage(file) {
-    const fileExt = (file.name.split(".").pop() || "png").toLowerCase();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+    try {
+        // 1. On convertit l'image en WebP avant l'envoi
+        // Peu importe le format de base (JPG, PNG...), il devient du WebP
+        const webpBlob = await processImageToWebP(file);
 
-    const { error } = await client.storage
-        .from(BUCKET_NAME)
-        .upload(fileName, file, { cacheControl: "3600", upsert: false });
+        // 2. On prépare le nom du fichier avec l'extension .webp
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
 
-    if (error) {
-        alert("Erreur upload : " + error.message);
+        // 3. Envoi vers Supabase
+        const { error } = await client.storage
+            .from(BUCKET_NAME)
+            .upload(fileName, webpBlob, { 
+                contentType: 'image/webp', // On précise le type MIME
+                cacheControl: "3600", 
+                upsert: false 
+            });
+
+        if (error) {
+            alert("Erreur upload : " + error.message);
+            return null;
+        }
+
+        return fileName;
+    } catch (err) {
+        console.error("Erreur lors du traitement de l'image:", err);
+        alert("Erreur lors de l'optimisation de l'image.");
         return null;
     }
-
-    return fileName;
-}
-
-function getImagePublicUrl(imagePath) {
-    if (!imagePath) return "";
-    const { data } = client.storage.from(BUCKET_NAME).getPublicUrl(imagePath);
-    return data?.publicUrl || "";
 }
 
 /* ===============================
