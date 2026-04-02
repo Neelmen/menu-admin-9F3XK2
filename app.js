@@ -108,26 +108,39 @@ async function processImageToWebP(file) {
 /* ===============================
    OUTILS IMAGES
 ================================= */
+/* ===============================
+   OUTILS IMAGES (Etape 2)
+================================= */
 async function uploadImage(file) {
-    const fileExt = (file.name.split(".").pop() || "png").toLowerCase();
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+    try {
+        // 1. On transforme l'image en WebP avant de faire quoi que ce soit
+        const webpBlob = await processImageToWebP(file);
 
-    const { error } = await client.storage
-        .from(BUCKET_NAME)
-        .upload(fileName, file, { cacheControl: "3600", upsert: false });
+        // 2. On crée un nom de fichier unique qui finit forcément par .webp
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
 
-    if (error) {
-        alert("Erreur upload : " + error.message);
+        // 3. On envoie ce nouveau fichier compressé vers Supabase
+        const { error } = await client.storage
+            .from(BUCKET_NAME)
+            .upload(fileName, webpBlob, { 
+                contentType: 'image/webp',
+                cacheControl: "3600", 
+                upsert: false 
+            });
+
+        if (error) {
+            alert("Erreur upload : " + error.message);
+            return null;
+        }
+
+        // On renvoie le nom du fichier pour l'enregistrer dans la base de données
+        return fileName;
+        
+    } catch (err) {
+        console.error("Erreur lors du traitement de l'image:", err);
+        alert("Erreur lors de l'optimisation de l'image.");
         return null;
     }
-
-    return fileName;
-}
-
-function getImagePublicUrl(imagePath) {
-    if (!imagePath) return "";
-    const { data } = client.storage.from(BUCKET_NAME).getPublicUrl(imagePath);
-    return data?.publicUrl || "";
 }
 
 /* ===============================
