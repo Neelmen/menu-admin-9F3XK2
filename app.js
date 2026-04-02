@@ -66,7 +66,45 @@ async function checkSession() {
         populateSubcategoryDatalist();
     }
 }
+/**
+ * Convertit n'importe quel fichier image en WebP de manière asynchrone
+ * @param {File} file - Le fichier original sélectionné dans l'input
+ * @returns {Promise<Blob>} - Le fichier converti en format Blob WebP
+ */
+async function processImageToWebP(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const MAX_WIDTH = 1200;
+                let width = img.width;
+                let height = img.height;
 
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Conversion en WebP avec une qualité de 0.8 (80%)
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error("Erreur de conversion WebP"));
+                }, "image/webp", 0.8);
+            };
+            img.onerror = reject;
+        };
+        reader.onerror = reject;
+    });
+}
 /* ===============================
    OUTILS IMAGES
 ================================= */
