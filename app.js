@@ -106,20 +106,24 @@ async function processImageToWebP(file) {
     });
 }
 /* ===============================
-   OUTILS IMAGES
+   OUTILS IMAGES (REPARÉ ET OPTIMISÉ)
 ================================= */
-/* ===============================
-   OUTILS IMAGES (Etape 2)
-================================= */
+
+// CETTE FONCTION EST ESSENTIELLE POUR L'AFFICHAGE DES PLATS
+function getImagePublicUrl(imagePath) {
+    if (!imagePath) return "";
+    const { data } = client.storage.from(BUCKET_NAME).getPublicUrl(imagePath);
+    return data?.publicUrl || "";
+}
+
+// CETTE FONCTION S'OCCUPE DE L'ENVOI EN FORMAT WEBP
 async function uploadImage(file) {
     try {
-        // 1. On transforme l'image en WebP avant de faire quoi que ce soit
+        // On convertit d'abord en WebP via la fonction processImageToWebP que tu as ajoutée
         const webpBlob = await processImageToWebP(file);
 
-        // 2. On crée un nom de fichier unique qui finit forcément par .webp
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
 
-        // 3. On envoie ce nouveau fichier compressé vers Supabase
         const { error } = await client.storage
             .from(BUCKET_NAME)
             .upload(fileName, webpBlob, { 
@@ -133,16 +137,12 @@ async function uploadImage(file) {
             return null;
         }
 
-        // On renvoie le nom du fichier pour l'enregistrer dans la base de données
         return fileName;
-        
     } catch (err) {
-        console.error("Erreur lors du traitement de l'image:", err);
-        alert("Erreur lors de l'optimisation de l'image.");
+        console.error("Erreur upload image:", err);
         return null;
     }
 }
-
 /* ===============================
    CHARGER LES PLATS
 ================================= */
