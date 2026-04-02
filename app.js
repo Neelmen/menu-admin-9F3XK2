@@ -382,6 +382,13 @@ async function handleDishSubmit(e) {
     e.preventDefault();
     const form = e.target;
 
+    // 1. Récupération des éléments du bouton pour l'état de chargement
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.dataset.originalText || submitBtn.innerText;
+    
+    // On stocke le texte original pour ne pas le perdre entre "Ajouter" et "Modifier"
+    if (!submitBtn.dataset.originalText) submitBtn.dataset.originalText = originalBtnText;
+
     const name = form.querySelector('input[name="name"]').value.trim();
     const description = form.querySelector('textarea[name="description"]').value.trim();
     const price = parseFloat(form.querySelector('input[name="price"]').value || "0");
@@ -391,42 +398,55 @@ async function handleDishSubmit(e) {
     const available = form.querySelector('input[name="available"]').checked;
     const file = form.querySelector('input[name="image_file"]')?.files?.[0];
 
-    let image_path = null;
-    if (file) {
-        image_path = await uploadImage(file);
-        if (!image_path) return;
+    // Activation de l'état de chargement
+    submitBtn.innerText = "Optimisation et envoi...";
+    submitBtn.disabled = true;
+
+    try {
+        let image_path = null;
+        if (file) {
+            image_path = await uploadImage(file);
+            if (!image_path) {
+                throw new Error("L'upload de l'image a échoué.");
+            }
+        }
+
+        const editId = form.dataset.editId;
+
+        if (editId) {
+            const updateData = { name, description, price, category, subcategory, ingredients, available };
+            if (image_path) updateData.image_path = image_path;
+
+            const { error } = await client.from("dishes").update(updateData).eq("id", editId);
+            if (error) throw error;
+        } else {
+            const { error } = await client.from("dishes").insert([{
+                name, description, price, category, subcategory, ingredients, available, image_path
+            }]);
+            if (error) throw error;
+        }
+
+        // --- SI TOUT S'EST BIEN PASSÉ ---
+        form.reset();
+        const preview = document.getElementById("image-preview");
+        if (preview) preview.innerHTML = "";
+        
+        if (editId) {
+            delete form.dataset.editId;
+        }
+
+        loadDishes();
+        populateSubcategoryDatalist();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+    } catch (err) {
+        alert("Erreur : " + err.message);
+    } finally {
+        // --- QUOI QU'IL ARRIVE (Erreur ou Succès) ---
+        // On remet le bouton dans son état initial
+        submitBtn.innerText = form.dataset.editId ? "Modifier le plat" : "Ajouter";
+        submitBtn.disabled = false;
     }
-
-    const editId = form.dataset.editId;
-
-    if (editId) {
-        const updateData = { name, description, price, category, subcategory, ingredients, available };
-        if (image_path) updateData.image_path = image_path;
-
-        const { error } = await client.from("dishes").update(updateData).eq("id", editId);
-        if (error) return alert("Erreur modification plat : " + error.message);
-    } else {
-        const { error } = await client.from("dishes").insert([{
-            name, description, price, category, subcategory, ingredients, available, image_path
-        }]);
-        if (error) return alert("Erreur ajout plat : " + error.message);
-    }
-
-    // reset form + preview après submit
-    form.reset();
-    const fileInput = form.querySelector('input[name="image_file"]');
-    if (fileInput) fileInput.value = "";
-    const preview = document.getElementById("image-preview");
-    if (preview) preview.innerHTML = "";
-
-    if (editId) {
-        delete form.dataset.editId;
-        form.querySelector('button[type="submit"]').innerText = "Ajouter";
-    }
-
-    loadDishes();
-    populateSubcategoryDatalist();
-    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 /* ===============================
