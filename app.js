@@ -380,6 +380,11 @@ async function handleDishSubmit(e) {
     e.preventDefault();
     const form = e.target;
 
+    // 1. Préparation du bouton de soumission
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalBtnText = submitBtn.innerText;
+
+    // 2. Récupération des données du formulaire
     const name = form.querySelector('input[name="name"]').value.trim();
     const description = form.querySelector('textarea[name="description"]').value.trim();
     const price = parseFloat(form.querySelector('input[name="price"]').value || "0");
@@ -389,35 +394,68 @@ async function handleDishSubmit(e) {
     const available = form.querySelector('input[name="available"]').checked;
     const file = form.querySelector('input[name="image_file"]')?.files?.[0];
 
-    let image_path = null;
-    if (file) {
-        image_path = await uploadImage(file);
-        if (!image_path) return;
-    }
+    // 3. Activation de l'état de chargement
+    submitBtn.innerText = "Optimisation et envoi...";
+    submitBtn.disabled = true;
 
-    const editId = form.dataset.editId;
+    try {
+        let image_path = null;
+        
+        // Si un fichier est sélectionné, on utilise notre nouvelle fonction uploadImage (WebP)
+        if (file) {
+            image_path = await uploadImage(file);
+            if (!image_path) {
+                throw new Error("L'upload de l'image a échoué.");
+            }
+        }
 
-    if (editId) {
-        const updateData = { name, description, price, category, subcategory, ingredients, available };
-        if (image_path) updateData.image_path = image_path;
+        const editId = form.dataset.editId;
 
-        const { error } = await client.from("dishes").update(updateData).eq("id", editId);
-        if (error) return alert("Erreur modification plat : " + error.message);
+        if (editId) {
+            // MODE MODIFICATION
+            const updateData = { name, description, price, category, subcategory, ingredients, available };
+            if (image_path) updateData.image_path = image_path;
 
+            const { error } = await client.from("dishes").update(updateData).eq("id", editId);
+            if (error) throw error;
+        } else {
+            // MODE AJOUT
+            const { error } = await client.from("dishes").insert([{
+                name, description, price, category, subcategory, ingredients, available, image_path
+            }]);
+            if (error) throw error;
+        }
+
+        // --- SI SUCCÈS ---
         form.reset();
-        delete form.dataset.editId;
-        form.querySelector('button[type="submit"]').innerText = "Ajouter";
-    } else {
-        const { error } = await client.from("dishes").insert([{
-            name, description, price, category, subcategory, ingredients, available, image_path
-        }]);
-        if (error) return alert("Erreur ajout plat : " + error.message);
-        form.reset();
-    }
+        
+        // Nettoyage de l'aperçu d'image s'il existe dans ton HTML
+        const preview = document.getElementById("image-preview");
+        if (preview) preview.innerHTML = "";
+        
+        // Si on était en mode édition, on repasse en mode ajout
+        if (editId) {
+            delete form.dataset.editId;
+            submitBtn.innerText = "Ajouter"; 
+        }
 
-    loadDishes();
-    populateSubcategoryDatalist();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+        // Rafraîchissement de la liste et des suggestions
+        loadDishes();
+        populateSubcategoryDatalist();
+        
+        // Retour en haut de page fluide
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+    } catch (err) {
+        console.error("Erreur formulaire:", err);
+        alert("Erreur : " + err.message);
+    } finally {
+        // --- QUOI QU'IL ARRIVE (Erreur ou Succès) ---
+        // On réactive le bouton et on lui remet son texte normal
+        submitBtn.disabled = false;
+        // On vérifie si on est toujours en édition ou non pour le texte
+        submitBtn.innerText = form.dataset.editId ? "Modifier le plat" : "Ajouter";
+    }
 }
 
 /* ===============================
