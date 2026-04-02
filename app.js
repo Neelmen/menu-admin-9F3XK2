@@ -374,17 +374,13 @@ async function editDish(id) {
 }
 
 /* ===============================
-   SUBMIT FORMULAIRE
+   SUBMIT FORMULAIRE (AVEC NETTOYAGE)
 ================================= */
 async function handleDishSubmit(e) {
     e.preventDefault();
     const form = e.target;
-
-    // 1. Préparation du bouton de soumission
     const submitBtn = form.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn.innerText;
-
-    // 2. Récupération des données du formulaire
+    
     const name = form.querySelector('input[name="name"]').value.trim();
     const description = form.querySelector('textarea[name="description"]').value.trim();
     const price = parseFloat(form.querySelector('input[name="price"]').value || "0");
@@ -394,70 +390,69 @@ async function handleDishSubmit(e) {
     const available = form.querySelector('input[name="available"]').checked;
     const file = form.querySelector('input[name="image_file"]')?.files?.[0];
 
-    // 3. Activation de l'état de chargement
     submitBtn.innerText = "Optimisation et envoi...";
     submitBtn.disabled = true;
 
     try {
-        let image_path = null;
-        
-        // Si un fichier est sélectionné, on utilise notre nouvelle fonction uploadImage (WebP)
-        if (file) {
-            image_path = await uploadImage(file);
-            if (!image_path) {
-                throw new Error("L'upload de l'image a échoué.");
+        let new_image_path = null;
+        const editId = form.dataset.editId;
+
+        // 1. Si on modifie ET qu'on a choisi une nouvelle image
+        if (editId && file) {
+            // On récupère l'ancien chemin de l'image AVANT de mettre à jour
+            const { data: oldDish } = await client
+                .from("dishes")
+                .select("image_path")
+                .eq("id", editId)
+                .single();
+
+            // Si une ancienne image existe, on la supprime de Supabase
+            if (oldDish?.image_path) {
+                await client.storage.from(BUCKET_NAME).remove([oldDish.image_path]);
+                console.log("Ancienne image supprimée pour faire place à la nouvelle.");
             }
         }
 
-        const editId = form.dataset.editId;
+        // 2. On procède à l'upload de la nouvelle image (en WebP)
+        if (file) {
+            new_image_path = await uploadImage(file);
+            if (!new_image_path) throw new Error("Erreur lors de l'upload.");
+        }
 
+        // 3. Mise à jour ou Insertion dans la base de données
         if (editId) {
-            // MODE MODIFICATION
             const updateData = { name, description, price, category, subcategory, ingredients, available };
-            if (image_path) updateData.image_path = image_path;
+            if (new_image_path) updateData.image_path = new_image_path;
 
             const { error } = await client.from("dishes").update(updateData).eq("id", editId);
             if (error) throw error;
         } else {
-            // MODE AJOUT
             const { error } = await client.from("dishes").insert([{
-                name, description, price, category, subcategory, ingredients, available, image_path
+                name, description, price, category, subcategory, ingredients, available, image_path: new_image_path
             }]);
             if (error) throw error;
         }
 
-        // --- SI SUCCÈS ---
+        // --- FINALISATION ---
         form.reset();
-        
-        // Nettoyage de l'aperçu d'image s'il existe dans ton HTML
         const preview = document.getElementById("image-preview");
         if (preview) preview.innerHTML = "";
         
-        // Si on était en mode édition, on repasse en mode ajout
         if (editId) {
             delete form.dataset.editId;
-            submitBtn.innerText = "Ajouter"; 
         }
 
-        // Rafraîchissement de la liste et des suggestions
         loadDishes();
         populateSubcategoryDatalist();
-        
-        // Retour en haut de page fluide
         window.scrollTo({ top: 0, behavior: "smooth" });
 
     } catch (err) {
-        console.error("Erreur formulaire:", err);
         alert("Erreur : " + err.message);
     } finally {
-        // --- QUOI QU'IL ARRIVE (Erreur ou Succès) ---
-        // On réactive le bouton et on lui remet son texte normal
         submitBtn.disabled = false;
-        // On vérifie si on est toujours en édition ou non pour le texte
         submitBtn.innerText = form.dataset.editId ? "Modifier le plat" : "Ajouter";
     }
 }
-
 /* ===============================
    POPULER LA DATALIST SOUS-CAT
 ================================= */
