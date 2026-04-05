@@ -82,9 +82,17 @@
 
         </form>
 
-        <h2>Liste des plats</h2>
+<h2>Liste des plats</h2>
 
-        <div id="dish-list"></div>
+<div class="sort-container">
+    <label for="sort-select">Trier par :</label>
+    <select id="sort-select" onchange="loadDishes()">
+        <option value="category">Catégorie</option>
+        <option value="alpha">Alphabétique</option>
+    </select>
+</div>
+
+<div id="dish-list"></div>
 
     </div>
 
