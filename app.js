@@ -144,7 +144,7 @@ async function uploadImage(file) {
     }
 }
 /* ===============================
-   CHARGER LES PLATS
+   CHARGER LES PLATS (AVEC TRI)
 ================================= */
 async function loadDishes() {
     const { data, error } = await client.from("dishes").select("*");
@@ -159,25 +159,105 @@ async function loadDishes() {
 
     container.innerHTML = "";
 
+    // On récupère le mode de tri choisi dans le HTML
+    const sortMode = document.getElementById("sort-select")?.value || "category";
+
     const activeDishes = (data || []).filter(d => d.available);
     const inactiveDishes = (data || []).filter(d => !d.available);
 
-    renderDishGroup(activeDishes, container);
-
-    if (inactiveDishes.length > 0) {
-        const separator = document.createElement("hr");
-        separator.className = "admin-separator";
-        separator.style.margin = "50px 0 10px 0";
-        container.appendChild(separator);
-
-        const title = document.createElement("h2");
-        title.innerText = "DÉSACTIVÉS :";
-        title.style.textAlign = "left";
-        title.style.margin = "0 0 20px 0";
-        container.appendChild(title);
-
-        renderDishGroup(inactiveDishes, container, true);
+    if (sortMode === "category") {
+        // Mode par défaut : Catégories et Sous-catégories
+        renderByCategory(activeDishes, container);
+        if (inactiveDishes.length > 0) {
+            renderSectionTitle(container, "DÉSACTIVÉS :");
+            renderByCategory(inactiveDishes, container, true);
+        }
+    } else {
+        // Mode Alphabétique : Liste simple en grille
+        renderAlphabetical(activeDishes, container);
+        if (inactiveDishes.length > 0) {
+            renderSectionTitle(container, "DÉSACTIVÉS :");
+            renderAlphabetical(inactiveDishes, container, true);
+        }
     }
+}
+
+/* ===============================
+   RENDU PAR CATÉGORIE
+================================= */
+function renderByCategory(dishes, container, isInactive = false) {
+    const categoryOrder = ["entree", "plat", "dessert", "accompagnement", "boisson"];
+
+    categoryOrder.forEach(category => {
+        const categoryDishes = dishes.filter(d => (d.category || "").toLowerCase() === category);
+        if (categoryDishes.length === 0) return;
+
+        const labels = { entree: "ENTRÉES", plat: "PLATS", dessert: "DESSERTS", boisson: "BOISSONS" };
+        renderSectionTitle(container, labels[category] || category.toUpperCase());
+
+        const subGroups = {};
+        categoryDishes.forEach(dish => {
+            const key = dish.subcategory?.trim() || "Autre";
+            if (!subGroups[key]) subGroups[key] = [];
+            subGroups[key].push(dish);
+        });
+
+        let subKeys = Object.keys(subGroups).sort((a, b) => subGroups[b].length - subGroups[a].length);
+        if (subKeys.includes("Autre")) {
+            subKeys = subKeys.filter(k => k !== "Autre");
+            subKeys.push("Autre");
+        }
+
+        subKeys.forEach(sub => {
+            const subTitle = document.createElement("h3");
+            subTitle.innerText = (sub === "Autre" && subGroups[sub].length > 1) ? "Autres" : sub;
+            subTitle.style.textAlign = "left";
+            subTitle.style.margin = "20px 0 10px 0";
+            container.appendChild(subTitle);
+
+            const grid = document.createElement("div");
+            grid.className = "category-group"; 
+            container.appendChild(grid);
+
+            subGroups[sub].forEach(dish => {
+                grid.appendChild(createDishCard(dish, isInactive));
+            });
+        });
+    });
+}
+
+/* ===============================
+   RENDU ALPHABÉTIQUE (NOUVEAU)
+================================= */
+function renderAlphabetical(dishes, container, isInactive = false) {
+    // 1. Tri A-Z sur le nom
+    const sortedDishes = [...dishes].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+    // 2. Création d'une grille spécifique
+    const grid = document.createElement("div");
+    // On utilise une classe spécifique pour la grille de 6
+    grid.className = "alphabetical-grid"; 
+    container.appendChild(grid);
+
+    sortedDishes.forEach(dish => {
+        grid.appendChild(createDishCard(dish, isInactive));
+    });
+}
+
+/* ===============================
+   HELPER : TITRES DE SECTIONS
+================================= */
+function renderSectionTitle(container, text) {
+    const separator = document.createElement("hr");
+    separator.className = "admin-separator";
+    separator.style.margin = "50px 0 10px 0";
+    container.appendChild(separator);
+
+    const title = document.createElement("h2");
+    title.innerText = text;
+    title.style.textAlign = "left";
+    title.style.margin = "0 0 20px 0";
+    container.appendChild(title);
 }
 
 /* ===============================
