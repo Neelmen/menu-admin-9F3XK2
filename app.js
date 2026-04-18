@@ -284,6 +284,7 @@ async function handleDishSubmit(e) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const formData = new FormData(form);
     const editId = form.dataset.editId;
+    const preview = document.getElementById("image-preview"); // On cible la preview
 
     submitBtn.disabled = true;
     try {
@@ -308,10 +309,17 @@ async function handleDishSubmit(e) {
         } else {
             await client.from("dishes").insert([payload]);
         }
-        form.reset();
+
+        form.reset(); // Vide les champs texte
+        if (preview) preview.innerHTML = ""; // <--- ICI : Vide l'image de prévisualisation
         loadDishes();
-    } catch (err) { alert(err.message); }
-    finally { submitBtn.disabled = false; submitBtn.innerText = "Ajouter"; }
+
+    } catch (err) {
+        alert(err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Ajouter";
+    }
 }
 
 async function deleteDish(id) {
@@ -321,14 +329,49 @@ async function deleteDish(id) {
 }
 
 async function editDish(id) {
-    const { data } = await client.from("dishes").select("*").eq("id", id).single();
+    // 1. Récupération de toutes les données du plat depuis Supabase
+    const { data, error } = await client.from("dishes").select("*").eq("id", id).single();
+
+    if (error || !data) {
+        alert("Erreur lors de la récupération du plat");
+        return;
+    }
+
     const form = document.getElementById("dish-form");
-    form.querySelector('[name="name"]').value = data.name;
-    form.querySelector('[name="price"]').value = data.price;
-    form.querySelector('[name="category"]').value = data.category;
-    form.dataset.editId = id;
-    form.querySelector('button[type="submit"]').innerText = "Modifier";
-    window.scrollTo(0, 0);
+
+    // 2. Pré-remplissage des champs textes et numériques
+    form.querySelector('[name="name"]').value = data.name || "";
+    form.querySelector('[name="price"]').value = data.price || "";
+    form.querySelector('[name="category"]').value = data.category || "plat";
+    form.querySelector('[name="subcategory"]').value = data.subcategory || "";
+    form.querySelector('[name="description"]').value = data.description || "";
+    form.querySelector('[name="ingredients"]').value = data.ingredients || "";
+
+    // 3. Gestion du bouton Switch (Disponible / Indisponible)
+    const availableCheckbox = form.querySelector('#available');
+    if (availableCheckbox) {
+        availableCheckbox.checked = data.available;
+    }
+
+    // 4. Affichage de l'aperçu de l'image actuelle (si elle existe)
+    const preview = document.getElementById("image-preview");
+    if (preview && data.image_path) {
+        const url = getImagePublicUrl(data.image_path);
+        preview.innerHTML = `
+            <p style="font-size: 0.8em; margin-top: 10px;">Image actuelle :</p>
+            <img src="${url}" style="max-width:150px; border-radius:10px; border: 2px solid #ccc;">
+        `;
+    } else if (preview) {
+        preview.innerHTML = "";
+    }
+
+    // 5. Préparation du formulaire pour la mise à jour
+    form.dataset.editId = id; // On stocke l'ID pour savoir qu'on modifie
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.innerText = "Modifier le plat";
+
+    // 6. Remonter en haut de page en douceur pour voir le formulaire rempli
+    window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function populateSubcategoryDatalist() {
