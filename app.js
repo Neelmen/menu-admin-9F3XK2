@@ -131,9 +131,12 @@ async function loadDishes() {
     if (!container) return;
     container.innerHTML = "";
 
-    // On récupère les deux valeurs des nouveaux menus
-    const sortMode = document.getElementById("sort-select")?.value || "category";
-    const layoutMode = document.getElementById("layout-select")?.value || "grid-6";
+    // ON DÉFINIT LES VALEURS PAR DÉFAUT ICI :
+    const sortSelect = document.getElementById("sort-select");
+    const layoutSelect = document.getElementById("layout-select");
+
+    const sortMode = sortSelect ? sortSelect.value : "category";
+    const layoutMode = layoutSelect ? layoutSelect.value : "grid-mosaic";
 
     // Séparation Actifs / Inactifs (pour garder ta logique)
     const activeDishes = (data || []).filter(d => d.available);
