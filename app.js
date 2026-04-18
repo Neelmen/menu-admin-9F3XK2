@@ -21,45 +21,52 @@ document.addEventListener("DOMContentLoaded", () => {
     populateSubcategoryDatalist();
 });
 
+/* ===============================
+   LOGIN ADMIN (ACCÈS VIA TABLE)
+================================= */
 async function loginAdmin() {
-    const usernameOrEmail = document.getElementById("admin-email")?.value?.trim();
+    const username = document.getElementById("admin-email")?.value?.trim();
     const password = document.getElementById("admin-password")?.value;
     const loginMessage = document.getElementById("login-message");
 
-    if (loginMessage) loginMessage.innerText = "Vérification...";
+    if (!username || !password) {
+        if (loginMessage) loginMessage.innerText = "Veuillez remplir tous les champs.";
+        return;
+    }
 
-    const { data: authData, error: authError } = await client.auth.signInWithPassword({
-        email: usernameOrEmail,
-        password: password
-    });
+    if (loginMessage) loginMessage.innerText = "Vérification des identifiants...";
 
-    if (!authError) { showAdminPanel(); return; }
-
-    const { data: customUser } = await client
+    // On vérifie directement dans ta table personnalisée
+    const { data: user, error } = await client
         .from("access_control")
         .select("*")
-        .eq("username", usernameOrEmail)
+        .eq("username", username)
         .eq("password", password)
         .single();
 
-    if (customUser) {
-        sessionStorage.setItem("custom_admin_session", "true");
-        showAdminPanel();
+    if (error || !user) {
+        if (loginMessage) loginMessage.innerText = "Identifiant ou mot de passe incorrect.";
+        console.error("Erreur login:", error);
         return;
     }
-    if (loginMessage) loginMessage.innerText = "Erreur : Identifiants incorrects.";
+
+    // Si on est ici, c'est que l'utilisateur existe
+    sessionStorage.setItem("custom_admin_session", "true");
+    showAdminPanel();
 }
 
 async function logoutAdmin() {
-    await client.auth.signOut();
+    // On vide simplement la session locale
     sessionStorage.removeItem("custom_admin_session");
     location.reload();
 }
 
 async function checkSession() {
-    const { data } = await client.auth.getSession();
+    // On vérifie si notre "clé" personnalisée est présente
     const hasCustomSession = sessionStorage.getItem("custom_admin_session") === "true";
-    if (data?.session || hasCustomSession) showAdminPanel();
+    if (hasCustomSession) {
+        showAdminPanel();
+    }
 }
 
 function showAdminPanel() {
@@ -113,73 +120,98 @@ async function uploadImage(file) {
 /* ===============================
    CHARGEMENT & AFFICHAGE (MODIFIÉ)
 ================================= */
+/* ===============================
+   CHARGEMENT & AFFICHAGE (MODIFIÉ)
+================================= */
 async function loadDishes() {
     const { data, error } = await client.from("dishes").select("*");
-    if (error) return console.error(error);
+    if (error) return console.error("Erreur chargement :", error);
 
     const container = document.getElementById("dish-list");
     if (!container) return;
     container.innerHTML = "";
 
+    // On récupère les deux valeurs des nouveaux menus
     const sortMode = document.getElementById("sort-select")?.value || "category";
-    const layoutMode = document.getElementById("layout-select")?.value || "grid-6"; // NOUVEAU
+    const layoutMode = document.getElementById("layout-select")?.value || "grid-6";
 
+    // Séparation Actifs / Inactifs (pour garder ta logique)
     const activeDishes = (data || []).filter(d => d.available);
     const inactiveDishes = (data || []).filter(d => !d.available);
 
     if (sortMode === "category") {
+        // Mode Catégorie : On crée une bulle par catégorie
         renderByCategory(activeDishes, container, layoutMode);
+
         if (inactiveDishes.length > 0) {
-            renderSectionTitle(container, "DÉSACTIVÉS :");
+            const sep = document.createElement("hr");
+            sep.className = "admin-separator";
+            container.appendChild(sep);
             renderByCategory(inactiveDishes, container, layoutMode, true);
         }
     } else {
+        // Mode Alphabétique : Tout dans une seule grande bulle
         renderAlphabetical(activeDishes, container, layoutMode);
+
         if (inactiveDishes.length > 0) {
-            renderSectionTitle(container, "DÉSACTIVÉS :");
+            const sep = document.createElement("hr");
+            sep.className = "admin-separator";
+            container.appendChild(sep);
             renderAlphabetical(inactiveDishes, container, layoutMode, true);
         }
     }
 }
 
 function renderByCategory(dishes, container, layoutMode, isInactive = false) {
-    const categoryOrder = ["entree", "plat", "dessert", "accompagnement", "boisson"];
-    const labels = { entree: "ENTRÉES", plat: "PLATS", dessert: "DESSERTS", boisson: "BOISSONS", accompagnement: "ACCOMPAGNEMENTS" };
+    const categories = ["entree", "plat", "accompagnement", "dessert", "boisson"];
+    const labels = { entree: "ENTRÉES", plat: "PLATS", accompagnement: "ACCOMPAGNEMENTS", dessert: "DESSERTS", boisson: "BOISSONS" };
 
-    categoryOrder.forEach(category => {
-        const categoryDishes = dishes.filter(d => (d.category || "").toLowerCase() === category);
-        if (categoryDishes.length === 0) return;
+    categories.forEach(cat => {
+        const filtered = dishes.filter(d => (d.category || "").toLowerCase() === cat);
+        if (filtered.length === 0) return;
 
-        renderSectionTitle(container, labels[category] || category.toUpperCase());
+        // CRÉATION DE LA BULLE 3D
+        const bubble = document.createElement("div");
+        bubble.className = "group-bubble";
 
-        const subGroups = {};
-        categoryDishes.forEach(dish => {
-            const key = dish.subcategory?.trim() || "Autre";
-            if (!subGroups[key]) subGroups[key] = [];
-            subGroups[key].push(dish);
+        const title = document.createElement("h2");
+        title.innerText = isInactive ? `${labels[cat]} (DÉSACTIVÉS)` : labels[cat];
+        bubble.appendChild(title);
+
+        // Application du mode de grille choisi (grid-6, grid-mosaic ou grid-single)
+        const grid = document.createElement("div");
+        grid.className = layoutMode;
+
+        filtered.forEach(dish => {
+            grid.appendChild(createDishCard(dish, isInactive));
         });
 
-        Object.keys(subGroups).forEach(sub => {
-            const subTitle = document.createElement("h3");
-            subTitle.innerText = sub;
-            container.appendChild(subTitle);
-
-            const grid = document.createElement("div");
-            grid.className = layoutMode; // On applique la classe de disposition ici
-            container.appendChild(grid);
-
-            subGroups[sub].forEach(dish => grid.appendChild(createDishCard(dish, isInactive)));
-        });
+        bubble.appendChild(grid);
+        container.appendChild(bubble);
     });
 }
 
 function renderAlphabetical(dishes, container, layoutMode, isInactive = false) {
-    const sortedDishes = [...dishes].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-    const grid = document.createElement("div");
-    grid.className = layoutMode; // On applique la classe de disposition ici
-    container.appendChild(grid);
+    if (dishes.length === 0) return;
 
-    sortedDishes.forEach(dish => grid.appendChild(createDishCard(dish, isInactive)));
+    // CRÉATION DE LA BULLE UNIQUE POUR LE TRI A-Z
+    const bubble = document.createElement("div");
+    bubble.className = "group-bubble";
+
+    const title = document.createElement("h2");
+    title.innerText = isInactive ? "TOUS LES PLATS A-Z (DÉSACTIVÉS)" : "TOUS LES PLATS (ORDRE ALPHABÉTIQUE)";
+    bubble.appendChild(title);
+
+    const grid = document.createElement("div");
+    grid.className = layoutMode;
+
+    const sorted = [...dishes].sort((a, b) => a.name.localeCompare(b.name));
+    sorted.forEach(dish => {
+        grid.appendChild(createDishCard(dish, isInactive));
+    });
+
+    bubble.appendChild(grid);
+    container.appendChild(bubble);
 }
 
 function renderSectionTitle(container, text) {
@@ -203,10 +235,16 @@ function createDishCard(dish, isInactive) {
 
     const actions = document.createElement("div");
     actions.className = "dish-actions";
-    const editBtn = document.createElement("button"); editBtn.innerText = "Modifier";
-    editBtn.onclick = () => editDish(dish.id);
-    const delBtn = document.createElement("button"); delBtn.innerText = "Supprimer";
-    delBtn.onclick = () => deleteDish(dish.id);
+
+    const editBtn = document.createElement("button");
+    editBtn.innerText = "Modifier";
+    // Important : stopPropagation pour éviter que le clic sur le bouton ne relance le timer de la carte
+    editBtn.onclick = (e) => { e.stopPropagation(); editDish(dish.id); };
+
+    const delBtn = document.createElement("button");
+    delBtn.innerText = "Supprimer";
+    delBtn.onclick = (e) => { e.stopPropagation(); deleteDish(dish.id); };
+
     actions.append(editBtn, delBtn);
     imageDiv.appendChild(actions);
 
@@ -215,6 +253,25 @@ function createDishCard(dish, isInactive) {
     info.innerHTML = `<b>${escapeHtml(dish.name)}</b><br>${formatPrice(dish.price)}`;
 
     card.append(imageDiv, info);
+
+    // --- LOGIQUE DE SÉCURITÉ AU CLIC ---
+    let timer = null;
+
+    card.addEventListener("click", () => {
+        // Si la carte est déjà active, on ne fait rien (ou on peut refermer si on veut)
+        if (card.classList.contains("active")) return;
+
+        // On active la carte (rend les boutons visibles et cliquables)
+        card.classList.add("active");
+
+        // On lance le compte à rebours de 2 secondes
+        if (timer) clearTimeout(timer); // Sécurité si on clique frénétiquement
+
+        timer = setTimeout(() => {
+            card.classList.remove("active");
+        }, 2000); // 2000ms = 2 secondes
+    });
+
     return card;
 }
 
