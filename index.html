@@ -64,24 +64,22 @@
 
         <h2>Liste des plats</h2>
 
-        <div class="sort-container">
-            <div class="sort-block">
-                <label for="sort-select">Trier par :</label>
-                <select id="sort-select" onchange="loadDishes()">
-                    <option value="category">Catégorie</option>
-                    <option value="alpha">Alphabétique</option>
-                </select>
-            </div>
-
-            <div class="sort-block">
-                <label for="layout-select">Disposition :</label>
-                <select id="layout-select" onchange="loadDishes()">
-                    <option value="grid-6">Lignes de 6</option>
-                    <option value="grid-mosaic">Mosaïque (Auto)</option>
-                    <option value="grid-single">1 par 1 (Liste)</option>
-                </select>
-            </div>
-        </div>
+<div class="sort-container">
+    <div class="sort-block">
+        <label for="sort-select">Trier par :</label>
+        <select id="sort-select" onchange="loadDishes()">
+            <option value="category" selected>Catégorie</option> <option value="alpha">Alphabétique</option>
+        </select>
+    </div>
+    
+    <div class="sort-block">
+        <label for="layout-select">Disposition :</label>
+        <select id="layout-select" onchange="loadDishes()">
+            <option value="grid-6">Lignes de 6</option>
+            <option value="grid-mosaic" selected>Mosaïque (Auto)</option> <option value="grid-single">1 par 1 (Liste)</option>
+        </select>
+    </div>
+</div>
 
         <div id="dish-list"></div>
 
