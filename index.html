@@ -2,50 +2,33 @@
 <html lang="fr">
 
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <title>Admin Menu</title>
-
     <link rel="stylesheet" href="style.css">
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 </head>
 
 <body>
 
     <h1>Administration Menu</h1>
 
-    <!-- LOGIN ADMIN -->
-
     <div id="login-section">
-
         <h2>Connexion Admin</h2>
-
         <input type="email" id="admin-email" placeholder="Email" required>
-
         <input type="password" id="admin-password" placeholder="Mot de passe" required>
-
         <button type="button" onclick="loginAdmin()">Se connecter</button>
-
         <p id="login-message"></p>
-
     </div>
 
-    <!-- PANEL ADMIN -->
-
     <div id="admin-panel" style="display:none;">
-
         <button type="button" onclick="logoutAdmin()">Se déconnecter</button>
 
         <hr class="admin-separator">
 
         <h2>Ajouter / Modifier un plat</h2>
-
         <form id="dish-form">
-
             <input type="text" id="name" name="name" placeholder="Nom du plat" required>
 
             <select id="category" name="category">
@@ -67,9 +50,7 @@
             <div id="image-preview"></div>
 
             <input type="number" id="price" name="price" placeholder="Prix" step="0.01" required>
-
             <textarea id="description" name="description" placeholder="Description"></textarea>
-
             <textarea id="ingredients" name="ingredients" placeholder="Ingrédients"></textarea>
 
             Afficher au menu
@@ -79,45 +60,48 @@
             </label>
 
             <button type="submit">Ajouter</button>
-
         </form>
 
-<h2>Liste des plats</h2>
+        <h2>Liste des plats</h2>
 
-<div class="sort-container">
-    <label for="sort-select">Trier par :</label>
-    <select id="sort-select" onchange="loadDishes()">
-        <option value="category">Catégorie</option>
-        <option value="alpha">Alphabétique</option>
-    </select>
-</div>
+        <div class="sort-container">
+            <div class="sort-block">
+                <label for="sort-select">Trier par :</label>
+                <select id="sort-select" onchange="loadDishes()">
+                    <option value="category">Catégorie</option>
+                    <option value="alpha">Alphabétique</option>
+                </select>
+            </div>
 
-<div id="dish-list"></div>
+            <div class="sort-block">
+                <label for="layout-select">Disposition :</label>
+                <select id="layout-select" onchange="loadDishes()">
+                    <option value="grid-6">Lignes de 6</option>
+                    <option value="grid-mosaic">Mosaïque (Auto)</option>
+                    <option value="grid-single">1 par 1 (Liste)</option>
+                </select>
+            </div>
+        </div>
 
+        <div id="dish-list"></div>
     </div>
 
-    <!-- JS COMPLET -->
     <script src="app.js"></script>
 
-    <!-- preview image -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const imageInput = document.getElementById("image_file");
             const preview = document.getElementById("image-preview");
-
-            imageInput.addEventListener("change", () => {
+            imageInput?.addEventListener("change", () => {
                 const file = imageInput.files[0];
-
                 if (file) {
                     const url = URL.createObjectURL(file);
-                    preview.innerHTML =
-                        `<img src="${url}" style="max-width:200px;border-radius:10px;margin-top:10px;">`;
+                    preview.innerHTML = `<img src="${url}" style="max-width:200px;border-radius:10px;margin-top:10px;">`;
                 } else {
                     preview.innerHTML = "";
                 }
             });
         });
     </script>
-
 </body>
 </html>

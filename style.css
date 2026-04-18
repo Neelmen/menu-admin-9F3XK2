@@ -25,59 +25,54 @@ h1 {
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
-#login-section input {
-    display: block;
-    width: 250px;
-    padding: 12px;
-    margin: 10px auto;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    color: #333;
-}
+    #login-section input {
+        display: block;
+        width: 250px;
+        padding: 12px;
+        margin: 10px auto;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        color: #333;
+    }
 
-#login-section button {
-    background: #ccc;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
+    #login-section button {
+        background: #ccc;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
 
-#login-section button:hover {
-    background: #e63946;
-    color: white !important;
-}
+        #login-section button:hover {
+            background: #e63946;
+            color: white !important;
+        }
 
 /* ===============================
-   ADMIN PANEL
+   ADMIN PANEL & FORM
 ================================= */
 #admin-panel {
     max-width: 1000px;
     margin: auto;
 }
 
-#admin-panel > button {
-    background: #ccc;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 25px;
-    cursor: pointer;
-    margin-bottom: 20px;
-    font-weight: bold;
-    transition: all 0.2s;
-}
+    #admin-panel > button {
+        background: #ccc;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        cursor: pointer;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
 
-#admin-panel > button:hover {
-    background: #e63946;
-    color: white !important;
-}
+        #admin-panel > button:hover {
+            background: #e63946;
+        }
 
-/* ===============================
-   FORM
-================================= */
 #dish-form {
     background: white;
     padding: 25px;
@@ -87,106 +82,138 @@ h1 {
     text-align: left;
 }
 
-#dish-form input,
-#dish-form select,
-#dish-form textarea {
-    width: calc(100% - 20px);
-    margin: 8px 0;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    color: #333;
-}
+    #dish-form input, #dish-form select, #dish-form textarea {
+        width: calc(100% - 20px);
+        margin: 8px 0;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+    }
 
-#dish-form button {
-    display: block;
-    margin: 20px auto;
-    background: #ccc;
-    color: white;
-    padding: 12px 30px;
-    border-radius: 8px;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
+    #dish-form button {
+        display: block;
+        margin: 20px auto;
+        background: #ccc;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
 
-#dish-form button:hover {
-    background: #e63946;
-    color: white !important;
-}
+        #dish-form button:hover {
+            background: #e63946;
+        }
 
 /* ===============================
-   LISTE PLATS - ADMIN
+   BARRE DE RÉGLAGES (TRI & DISPO)
 ================================= */
-#dish-list {
+.sort-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 20px auto 30px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-sizing: border-box;
+    text-align: left;
+}
+
+.sort-block {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 8px;
 }
 
-/* ===== TITRES CATEGORIES ===== */
-#dish-list h2 {
-    font-size: 22px;
-    font-weight: bold;
-    text-transform: uppercase;
-    margin: 10px 0 20px 0;
-    text-align: left;
-}
-
-/* ===== TITRES SOUS-CATEGORIES ===== */
-#dish-list h3 {
-    font-size: 16px;
-    font-weight: bold;
-    margin: 20px 0 10px 0;
-    text-align: left;
-    color: #444;
-}
-
-/* Chaque catégorie - grille 6 colonnes fixes */
-.category-group {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr); /* important */
-    gap: 20px;
-}
-
-/* Mobile */
-@media (max-width: 1200px) {
-    .category-group {
-        grid-template-columns: repeat(2, 1fr);
+    .sort-block label {
+        font-weight: bold;
+        font-size: 14px;
+        color: #333;
     }
+
+    .sort-block select {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px top 50%;
+        background-size: 12px auto;
+    }
+
+/* ===============================
+   MODES DE DISPOSITION (GRILLES)
+================================= */
+.grid-6 {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 15px;
 }
-/* Card */
+
+.grid-mosaic {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+}
+
+.grid-single {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+    /* Adaptation Carte mode liste */
+    .grid-single .dish-card {
+        flex-direction: row;
+        max-width: 100%;
+        height: 120px;
+        align-items: center;
+    }
+
+    .grid-single .dish-image {
+        width: 120px;
+        height: 120px;
+        padding-top: 0;
+        flex-shrink: 0;
+    }
+
+    .grid-single .dish-info {
+        padding-left: 20px;
+    }
+
+/* Styles de base des cartes */
 .dish-card {
     background: white;
     border-radius: 15px;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 auto;
     overflow: hidden;
     box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     display: flex;
     flex-direction: column;
 }
 
-/* IMAGE */
 .dish-image {
     position: relative;
     width: 100%;
     padding-top: 100%;
-    overflow: hidden;
+    background: #f0f0f0;
 }
 
-.dish-image img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    .dish-image img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-/* OVERLAY ACTIONS */
 .dish-actions {
     position: absolute;
     top: 0;
@@ -207,7 +234,6 @@ h1 {
     opacity: 1;
 }
 
-/* Boutons */
 .dish-actions button {
     background: #ccc;
     color: white;
@@ -215,194 +241,87 @@ h1 {
     padding: 8px 14px;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
-    transition: all 0.2s;
 }
 
-.dish-actions button:hover {
-    background: #e63946;
-    color: white !important;
-}
-
-/* Info plat */
 .dish-info {
     padding: 10px;
     text-align: left;
-    color: #333;
 }
 
-/* Séparateur */
+/* Divers */
 .admin-separator {
     border: none;
     border-top: 1px solid #bbb;
     margin: 40px 0;
 }
 
-/* Safari fallback - On exclut les checkbox pour qu'elles restent visibles */
-button, select, textarea, input:not([type="checkbox"]) {
-    -webkit-appearance: none;
-    color: inherit !important;
-    font-family: inherit;
-}
-
-/* Description / ingrédients */
-.description {
-    margin-top: 5px;
-}
-
-.ingredients {
-    margin-top: 10px;
-}
-/* Style pour le bouton activable (Switch) */
 .switch {
-  position: relative;
-  display: inline-block;
-  width: 40px;
-  height: 20px;
-  vertical-align: middle;
-  margin-left: 10px;
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    margin-left: 10px;
+    vertical-align: middle;
 }
 
-.switch input {
-  opacity: 0;
-  width: 0; height: 0;
-}
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 
 .slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 20px;
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 20px;
 }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 14px; width: 14px;
-  left: 3px; bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
 
 input:checked + .slider {
-  background-color: #33DE1B; /* Rouge comme tes autres boutons */
+    background-color: #33DE1B;
 }
 
-input:checked + .slider:before {
-  transform: translateX(20px);
-}
-/* Style moderne pour le bouton de sélection d'image */
+    input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+
 .file-upload {
     display: inline-block;
-    background-color: #333; /* Noir pour contraster */
+    background: #333;
     color: white;
     padding: 10px 20px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    transition: all 0.3s ease;
-    text-align: center;
     margin: 10px 0;
 }
 
-.file-upload:hover {
-    background-color: #e63946; /* Rouge au survol */
-}
-
-/* On cache l'input moche par défaut */
 #image_file {
     display: none;
 }
 
-/* Zone d'aperçu image juste sous le bouton */
-#image-preview {
-    margin: 5px 0 15px 0;
-    text-align: left;
-}
-
-#image-preview img {
-    max-width: 150px;
-    height: auto;
-    border-radius: 10px;
-    border: 3px solid white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-/* ===============================
-   BARRE DE TRI
-================================= */
-/* ===============================
-   BARRE DE TRI (Largeur Totale)
-================================= */
-.sort-container {
-    display: flex;
-    flex-direction: column;      /* Aligne label et select verticalement */
-    align-items: flex-start;     /* Aligne au début à gauche */
-    gap: 10px;                   /* Espace entre le texte et le bouton */
-    margin: 20px auto 30px auto; /* Centré horizontalement */
-    background: white;
-    padding: 25px;               /* Même padding que #dish-form */
-    border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-    max-width: 1000px;           /* Même largeur que le panel admin */
-    box-sizing: border-box;
-    text-align: left;
-}
-
-.sort-container label {
-    font-weight: bold;
-    color: #333;
-    font-size: 16px;
-    margin-left: 5px;            /* Petit décalage esthétique */
-}
-
-.sort-container select {
-    width: 100%;                 /* LE BOUTON PREND TOUTE LA LARGEUR */
-    padding: 12px 15px;          /* Plus haut pour un meilleur confort */
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: white;
-    cursor: pointer;
-    font-size: 15px;
-    color: #333;
-    outline: none;
-    transition: all 0.2s;
-    
-    /* Pour forcer le style propre et ajouter la petite flèche */
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    background-position: right 15px top 50%;
-    background-size: 12px auto;
-}
-
-.sort-container select:hover {
-    border-color: #e63946; /* Rouge comme tes autres boutons au survol */
-}
-
-/* ===============================
-   GRILLE ALPHABÉTIQUE (6 COLONNES)
-================================= */
-.alphabetical-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 20px;
-    margin-top: 20px;
-}
-
-/* Adaptation Mobile / Tablette pour la grille alphabétique */
-@media (max-width: 1200px) {
-    .alphabetical-grid {
-        grid-template-columns: repeat(3, 1fr);
+@media (max-width: 800px) {
+    .sort-container {
+        flex-direction: column;
     }
-}
 
-@media (max-width: 768px) {
-    .alphabetical-grid {
+    .grid-6 {
         grid-template-columns: repeat(2, 1fr);
     }
 }
