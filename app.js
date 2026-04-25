@@ -21,52 +21,46 @@ document.addEventListener("DOMContentLoaded", () => {
     populateSubcategoryDatalist();
 });
 
-/* ===============================
-   LOGIN ADMIN (ACCÈS VIA TABLE)
-================================= */
+/* LOGIN & SESSION ********************************************************************************/
 async function loginAdmin() {
-    const username = document.getElementById("admin-email")?.value?.trim();
+    const username = document.getElementById("admin-email")?.value?.trim().toLowerCase();
     const password = document.getElementById("admin-password")?.value;
     const loginMessage = document.getElementById("login-message");
 
     if (!username || !password) {
-        if (loginMessage) loginMessage.innerText = "Veuillez remplir tous les champs.";
+        if (loginMessage) loginMessage.innerText = "Champs vides.";
         return;
     }
 
-    if (loginMessage) loginMessage.innerText = "Vérification des identifiants...";
+    if (loginMessage) loginMessage.innerText = "Connexion en cours...";
+    const fakeEmail = `${username}@digicarte.fr`;
 
-    // On vérifie directement dans ta table personnalisée
-    const { data: user, error } = await client
-        .from("access_control")
-        .select("*")
-        .eq("username", username)
-        .eq("password", password)
-        .single();
+    const { data, error } = await client.auth.signInWithPassword({
+        email: fakeEmail,
+        password: password
+    });
 
-    if (error || !user) {
-        if (loginMessage) loginMessage.innerText = "Identifiant ou mot de passe incorrect.";
-        console.error("Erreur login:", error);
+    if (error) {
+        if (loginMessage) loginMessage.innerText = "Identifiants invalides.";
+        console.error("Erreur login:", error.message);
         return;
     }
 
-    // Si on est ici, c'est que l'utilisateur existe
-    sessionStorage.setItem("custom_admin_session", "true");
+    // Si réussi, Supabase gère le jeton JWT automatiquement
     showAdminPanel();
 }
 
-async function logoutAdmin() {
-    // On vide simplement la session locale
-    sessionStorage.removeItem("custom_admin_session");
-    location.reload();
-}
-
 async function checkSession() {
-    // On vérifie si notre "clé" personnalisée est présente
-    const hasCustomSession = sessionStorage.getItem("custom_admin_session") === "true";
-    if (hasCustomSession) {
+    // On vérifie si une session active existe déjà au chargement de la page
+    const { data: { session } } = await client.auth.getSession();
+    if (session) {
         showAdminPanel();
     }
+}
+
+async function logoutAdmin() {
+    await client.auth.signOut();
+    location.reload();
 }
 
 function showAdminPanel() {
@@ -111,15 +105,13 @@ async function uploadImage(file) {
     try {
         const webpBlob = await processImageToWebP(file);
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.webp`;
+
         const { error } = await client.storage.from(BUCKET_NAME).upload(fileName, webpBlob, { contentType: 'image/webp' });
         if (error) throw error;
         return fileName;
     } catch (err) { console.error(err); return null; }
 }
 
-/* ===============================
-   CHARGEMENT & AFFICHAGE (MODIFIÉ)
-================================= */
 /* ===============================
    CHARGEMENT & AFFICHAGE (MODIFIÉ)
 ================================= */
@@ -326,8 +318,13 @@ async function handleDishSubmit(e) {
 }
 
 async function deleteDish(id) {
-    if (!confirm("Supprimer ?")) return;
+    if (!confirm("Supprimer définitivement ce plat et son image ?")) return;
+    const { data: dish } = await client.from("dishes").select("image_path").eq("id", id).single();
+    if (dish?.image_path) {
+        await client.storage.from(BUCKET_NAME).remove([dish.image_path]);
+    }
     await client.from("dishes").delete().eq("id", id);
+
     loadDishes();
 }
 
